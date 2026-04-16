@@ -18,4 +18,8 @@
     <ProjectReference Include="..\RetailSystem.Shared\RetailSystem.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\img\" />
+  </ItemGroup>
+
 </Project>

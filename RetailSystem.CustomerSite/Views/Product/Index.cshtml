@@ -1,0 +1,211 @@
+﻿@using RetailSystem.Shared.ViewModels
+@{
+    ViewData["Title"] = "Shop";
+
+    var filterGroups = new[]
+    {
+        new { Title = "Category", Items = new[] { "T-Shirts", "Hoodies", "Accessories", "Outerwear" } },
+        new { Title = "Size", Items = new[] { "S (30)", "M (44)", "L (22)", "XL (18)" } },
+        new { Title = "Color", Items = new[] { "Red", "Blue", "Green", "Sand" } },
+        new { Title = "Brand", Items = new[] { "Northline", "Mono Studio", "Velour", "Forme" } }
+    };
+
+    var ratings = new[] { "★★★★★", "★★★★☆", "★★★☆☆" };
+
+    var products = new[]
+    {
+        new { Name = "Blue women's suit", Category = "Women", Price = "$19.99", PreviousPrice = "$24.99", Accent = "#dce8f2", Badge = "Sale", Tag = "Soft tailoring" },
+        new { Name = "White shirt with long sleeves", Category = "Women", Price = "$29.99", PreviousPrice = "$36.99", Accent = "#f2eee7", Badge = "New", Tag = "Everyday edit" },
+        new { Name = "Yellow men's suit", Category = "Men", Price = "$15.99", PreviousPrice = "$19.99", Accent = "#f2e2b5", Badge = "Trending", Tag = "Bright tones" },
+        new { Name = "Red dress", Category = "Women", Price = "$39.99", PreviousPrice = "$49.99", Accent = "#f0d5d7", Badge = "Popular", Tag = "Event ready" },
+        new { Name = "Black leather jacket", Category = "Women", Price = "$39.99", PreviousPrice = "$49.99", Accent = "#e5e1dc", Badge = "Top rated", Tag = "Statement layer" },
+        new { Name = "Black long dress", Category = "Women, Accessories", Price = "$15.99", PreviousPrice = "$19.99", Accent = "#e8dfef", Badge = "Editor pick", Tag = "Evening flow" },
+        new { Name = "Cream utility hoodie", Category = "Men", Price = "$32.99", PreviousPrice = "$44.99", Accent = "#ece5d9", Badge = "Restocked", Tag = "Weekend staple" },
+        new { Name = "City tote bag", Category = "Accessories", Price = "$24.99", PreviousPrice = "$34.99", Accent = "#dcebd9", Badge = "Limited", Tag = "Carry-all" }
+    };
+}
+
+@model List<ProductViewModel>
+
+<link rel="stylesheet" href="./css/product.css" asp-append-version="true" />
+
+
+
+<section class="shop-page-section">
+    <div class="shell-container">
+        <div class="shop-page-header">
+            <div>
+                <span class="section-label">Shirts category</span>
+                <h1>Discover polished staples with an editorial shop layout.</h1>
+            </div>
+            <p>Browse a curated mix of shirts, tailoring, outerwear, and accessories arranged in a clean storefront inspired by the Tailstore shop page.</p>
+        </div>
+
+        <div class="shop-layout">
+            <aside class="shop-sidebar">
+                <div class="shop-filter-card">
+                    <div class="shop-filter-header">
+                        <span class="section-label">Filters</span>
+                        <a href="#products-grid">Clear all</a>
+                    </div>
+
+                    @foreach (var group in filterGroups)
+                    {
+                        <div class="filter-group">
+                            <h2>@group.Title</h2>
+                            <div class="filter-list">
+                                @foreach (var item in group.Items)
+                                {
+                                    <label class="filter-option">
+                                        <input type="checkbox" />
+                                        <span>@item</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="filter-group">
+                        <h2>Rating</h2>
+                        <div class="filter-list">
+                            @foreach (var rating in ratings)
+                            {
+                                <label class="filter-option rating-option">
+                                    <input type="radio" name="rating" />
+                                    <span>@rating</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="shop-side-story">
+                    <span class="section-label">Category story</span>
+                    <h2>Shirts that balance comfort, polish, and all-day versatility.</h2>
+                    <p>From crisp essentials to relaxed layers, this collection is designed for casual weekdays, elevated weekends, and everything in between.</p>
+                </div>
+            </aside>
+
+            <div class="shop-main-content">
+                <div class="shop-toolbar">
+                    <div class="toolbar-chips">
+                        <span class="toolbar-chip active">Show on sale</span>
+                        <span class="toolbar-chip">List view</span>
+                        <span class="toolbar-chip active-soft">Grid view</span>
+                    </div>
+                    <div class="toolbar-summary">
+                        <span>Showing 1–8 of 24 products</span>
+                        <button type="button" class="toolbar-sort">Sort by newest ▾</button>
+                    </div>
+                </div>
+
+                <div class="shop-product-grid" id="products-grid">
+                    <div class="card">
+                        <div class="badge">HOT SALE</div>
+                        <div class="tilt">
+                            <div class="img"><img src="https://images.unsplash.com/photo-1544237526-cae15a57ed1e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDkwNDY5NjB8&ixlib=rb-4.1.0&q=85" alt="Premium Laptop"></div>
+                        </div>
+                        <div class="info">
+                            <div class="cat">High-Performance Laptop</div>
+                            <h2 class="title">UltraBook Pro X</h2>
+                            <p class="desc">Cutting-edge performance with Intel Core i9, 32GB RAM, and a 1TB SSD in a sleek, lightweight design.</p>
+                            <div class="feats">
+                                <span class="feat">4K Display</span>
+                                <span class="feat">16-Hour Battery</span>
+                                <span class="feat">Thunderbolt 4</span>
+                            </div>
+                            <div class="bottom">
+                                <div class="price">
+                                    <span class="old">$2,499</span>
+                                    <span class="new">$1,999</span>
+                                </div>
+                                <button class="btn">
+                                    <span>Add to Cart</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="badge">HOT SALE</div>
+                        <div class="tilt">
+                            <div class="img"><img src="https://images.unsplash.com/photo-1544237526-cae15a57ed1e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDkwNDY5NjB8&ixlib=rb-4.1.0&q=85" alt="Premium Laptop"></div>
+                        </div>
+                        <div class="info">
+                            <div class="cat">High-Performance Laptop</div>
+                            <h2 class="title">UltraBook Pro X</h2>
+                            <p class="desc">Cutting-edge performance with Intel Core i9, 32GB RAM, and a 1TB SSD in a sleek, lightweight design.</p>
+                            <div class="feats">
+                                <span class="feat">4K Display</span>
+                                <span class="feat">16-Hour Battery</span>
+                                <span class="feat">Thunderbolt 4</span>
+                            </div>
+                            <div class="bottom">
+                                <div class="price">
+                                    <span class="old">$2,499</span>
+                                    <span class="new">$1,999</span>
+                                </div>
+                                <button class="btn">
+                                    <span>Add to Cart</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="badge">HOT SALE</div>
+                        <div class="tilt">
+                            <div class="img"><img src="https://images.unsplash.com/photo-1544237526-cae15a57ed1e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDkwNDY5NjB8&ixlib=rb-4.1.0&q=85" alt="Premium Laptop"></div>
+                        </div>
+                        <div class="info">
+                            <div class="cat">High-Performance Laptop</div>
+                            <h2 class="title">UltraBook Pro X</h2>
+                            <p class="desc">Cutting-edge performance with Intel Core i9, 32GB RAM, and a 1TB SSD in a sleek, lightweight design.</p>
+                            <div class="feats">
+                                <span class="feat">4K Display</span>
+                                <span class="feat">16-Hour Battery</span>
+                                <span class="feat">Thunderbolt 4</span>
+                            </div>
+                            <div class="bottom">
+                                <div class="price">
+                                    <span class="old">$2,499</span>
+                                    <span class="new">$1,999</span>
+                                </div>
+                                <button class="btn">
+                                    <span>Add to Cart</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="badge">HOT SALE</div>
+                        <div class="tilt">
+                            <div class="img"><img src="https://images.unsplash.com/photo-1544237526-cae15a57ed1e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDkwNDY5NjB8&ixlib=rb-4.1.0&q=85" alt="Premium Laptop"></div>
+                        </div>
+                        <div class="info">
+                            <div class="cat">High-Performance Laptop</div>
+                            <h2 class="title">UltraBook Pro X</h2>
+                            <p class="desc">Cutting-edge performance with Intel Core i9, 32GB RAM, and a 1TB SSD in a sleek, lightweight design.</p>
+                            <div class="feats">
+                                <span class="feat">4K Display</span>
+                                <span class="feat">16-Hour Battery</span>
+                                <span class="feat">Thunderbolt 4</span>
+                            </div>
+                            <div class="bottom">
+                                <div class="price">
+                                    <span class="old">$2,499</span>
+                                    <span class="new">$1,999</span>
+                                </div>
+                                <button class="btn">
+                                    <span>Add to Cart</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</section>
+
