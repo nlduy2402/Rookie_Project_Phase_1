@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using RetailSystem.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using RetailSystem.Infrastructure.Services;
+using RetailSystem.Infrastructure.Services.Interfaces;
+using RetailSystem.Shared.DTOs;
 
 namespace RetailSystem.API.Controllers
 {
@@ -9,22 +12,33 @@ namespace RetailSystem.API.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProductService _productService;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController(IProductService productService)
         {
-            _context = context;
+            _productService = productService;
         }
 
         // GET: api/products
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var products = await _context.Products
-                .Include(p => p.Categories)
-                .ToListAsync();
+            return Ok(await _productService.GetAllAsync());
+        }
 
-            return Ok(products);
+        // GET: api/products/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetByIdAsync(int id)
+        {
+
+            return Ok(await _productService.GetByIdAsync(id));
+        }
+
+        // POST api/products
+        [HttpPost]
+        public async Task<IActionResult> CreateAsync(CreateProductDTO model)
+        {
+            return Ok(await _productService.CreateAsync(model));
         }
     }
 }

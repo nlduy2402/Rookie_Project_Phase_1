@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using RetailSystem.Infrastructure.Persistence;
 using Scalar.AspNetCore;
+using RetailSystem.Infrastructure.Services;
+using RetailSystem.Infrastructure.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -15,7 +17,8 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter()
         );
     });
-
+builder.Services.AddScoped<ICategoryService, CategoryService > ();
+builder.Services.AddScoped<IProductService,ProductService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

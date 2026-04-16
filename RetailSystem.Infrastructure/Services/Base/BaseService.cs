@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RetailSystem.Infrastructure.Persistence;
+using RetailSystem.Infrastructure.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RetailSystem.Infrastructure.Services
+namespace RetailSystem.Infrastructure.Services.Base
 {
-    public class BaseService<TEntity> where TEntity : class
+    public class BaseService<TEntity> : IBaseService<TEntity> where TEntity : class
     {
         protected readonly AppDbContext _context;
         protected readonly DbSet<TEntity> _dbSet;

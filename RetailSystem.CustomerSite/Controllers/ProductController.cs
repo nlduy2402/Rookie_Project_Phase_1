@@ -19,7 +19,6 @@ namespace RetailSystem.CustomerSite.Controllers
 
             var result = products.Select(p => new ProductViewModel
             {
-                Id = p.Id,
                 Name = p.Name,
                 PriceDisplay = p.Price.ToString("N0") + " VNĐ",
                 Status = p.Status.ToString(),
