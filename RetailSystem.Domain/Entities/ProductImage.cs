@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace RetailSystem.Domain.Entities
 {
-    public class Category
+    public class ProductImage
     {
-        [Key]
         public int Id { get; set; }
-        [Required, MaxLength(100)]
         public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        [JsonIgnore]
+        [Required]
+        public string Url { get; set; } = string.Empty;
 
-        public virtual ICollection<Product>? Products { get; set; } = new List<Product>();
+        public int ProductId { get; set; }
+        [JsonIgnore]
+        public Product? Product { get; set; }
     }
 }

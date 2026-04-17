@@ -10,6 +10,8 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
 {
     public interface IProductService : IBaseService<Product>
     {
-        Task<ProductDTO> CreateAsync(CreateProductDTO model);
+        Task<ServiceResult<List<Product>>> GetAllProductAsync();
+        Task<ServiceResult<Product>> CreateAsync(CreateProductDTO model);
+        Task<ServiceResult<Product>> UpdateAsync(UpdateProductDTO model);
     }
 }

@@ -21,8 +21,6 @@ namespace RetailSystem.CustomerSite.Controllers
             {
                 Name = p.Name,
                 PriceDisplay = p.Price.ToString("N0") + " VNĐ",
-                Status = p.Status.ToString(),
-                Categories = p.Categories.Select(c => c.Name).ToList()
             }).ToList();
 
             return View(result);

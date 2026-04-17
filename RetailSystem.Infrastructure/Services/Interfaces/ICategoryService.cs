@@ -1,4 +1,5 @@
 ﻿using RetailSystem.Domain.Entities;
+using RetailSystem.Shared.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,7 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
 {
     public interface ICategoryService : IBaseService<Category>
     {
+        Task<Category> CreateAsync(CreateCategoryDTO model);
+        Task<ServiceResult<Category>> UpdateAsync(int id, UpdateCategoryDTO model);
     }
 }

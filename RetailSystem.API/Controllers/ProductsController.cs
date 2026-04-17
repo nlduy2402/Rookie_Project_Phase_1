@@ -23,7 +23,9 @@ namespace RetailSystem.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _productService.GetAllAsync());
+            var result = await _productService.GetAllProductAsync();
+            if (!result.IsSuccess) return BadRequest(result.Message);
+            return Ok(result.Data);
         }
 
         // GET: api/products/{id}
@@ -38,7 +40,21 @@ namespace RetailSystem.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAsync(CreateProductDTO model)
         {
-            return Ok(await _productService.CreateAsync(model));
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var result = await _productService.CreateAsync(model);
+            if(!result.IsSuccess) return BadRequest(result.Message);
+            return Ok(result.Data);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateAsync(UpdateProductDTO model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var result = await _productService.UpdateAsync(model);
+            if (!result.IsSuccess) return BadRequest(result.Message);
+            return Ok(result.Data);
         }
     }
 }

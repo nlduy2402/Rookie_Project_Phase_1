@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RetailSystem.Shared.Extensions;
 
 namespace RetailSystem.Infrastructure.Services
 {
@@ -19,41 +20,73 @@ namespace RetailSystem.Infrastructure.Services
         }
 
         // override nếu cần include
-        public override async Task<List<Product>> GetAllAsync()
+        public async Task<ServiceResult<List<Product>>> GetAllProductAsync()
         {
-            return await _context.Products
-                .Include(p => p.Categories)
-                .ToListAsync();
+            var result = await _context.Products
+                            .Include(p => p.Images)
+                            .Include(p => p.Category)
+                            .ToListAsync();
+            if (result == null) {
+                return new ServiceResult<List<Product>>()
+                {
+                    IsSuccess = false,
+                    Message = "Wrong"
+                };
+            }
+            return new ServiceResult<List<Product>>()
+            {
+                IsSuccess = true,
+                Data = result
+            };
         }
 
-        public async Task<ProductDTO> CreateAsync(CreateProductDTO model)
+        public async Task<ServiceResult<Product>> UpdateAsync(UpdateProductDTO model)
         {
-            var categories = await _context.Categories
-                .Where(c => model.CategoryIds.Contains(c.Id))
-                .ToListAsync();
+            var product = await _context.Products
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == model.Id);
+            if (product == null)
+            {
+                return new ServiceResult<Product>() { IsSuccess = false, Message = "Data not found!" };
 
-            Product p = new Product
+            }
+            product?.UpdateFromDto(model);
+            await _context.SaveChangesAsync();
+            return new ServiceResult<Product>()
+            {
+                IsSuccess = true,
+                Data = product
+            };
+        }
+
+
+        public async Task<ServiceResult<Product>> CreateAsync(CreateProductDTO model)
+        {
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(c => c.Id == model.CategoryId);
+
+            if (category == null)
+                return new ServiceResult<Product>() { IsSuccess = false, Message = "Data not found!" };
+            
+            var product = new Product
             {
                 Name = model.Name,
                 Description = model.Description,
-                Quantity = model.Quantity,
                 Price = model.Price,
-                CreatedAt = DateTime.Now,
-                LastUpdatedAt = DateTime.Now,
-                ImageUrl = model.ImageUrl,
-                Categories = categories
-            };
-            _context.Products.Add(p);
-            await _context.SaveChangesAsync();
-            var result = new ProductDTO
-            {
-                Name = p.Name,
-                Price = p.Price,
-                Status = p.Status.ToString(),
-                Categories = p.Categories.Select(c => c.Name).ToList()
-            };
+                Quantity = model.Quantity,
+                RAM = model.RAM,
+                SSD = model.SSD,
+                ChipSet = model.ChipSet,
+                CategoryId = model.CategoryId,
 
-            return result;
+                Images = model.ImageUrls.Select(url => new ProductImage
+                {
+                    Url = url
+                }).ToList()
+            };
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+            return new ServiceResult<Product>() { IsSuccess = false, Message = "Product Created!", Data=product };
         }
     }
 }

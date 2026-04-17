@@ -12,16 +12,26 @@ namespace RetailSystem.Shared.DTOs
 {
     public class CreateProductDTO
     {
+        [Required]
+        [MaxLength(200)]
         public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
-        public ProductStatus Status { get; set; } = ProductStatus.Draft;
-        public List<string> ImageUrl { get; set; } = new();
 
-        // nếu muốn gán category khi tạo
-        public List<int> CategoryIds { get; set; } = new();
+        [MaxLength(300)]
+        public string Description { get; set; } = string.Empty;
+
+        [Range(0, double.MaxValue),Column(TypeName = "decimal(18,2)")]
+        public decimal Price { get; set; }
+
+        [Range(0, int.MaxValue)]
+        public int Quantity { get; set; } = 0;
+        public string ChipSet { get; set; } = string.Empty;
+        public string RAM { get; set; } = string.Empty;
+        public string SSD { get; set; } = string.Empty;
+
         
+        public List<string> ImageUrls { get; set; } = new();
+
+        [Required]
+        public int CategoryId { get; set; }
     }
 }

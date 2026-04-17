@@ -11,6 +11,6 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
         Task<List<TEntity>> GetAllAsync();
         Task<TEntity?> GetByIdAsync(int id);
         Task<TEntity> CreateAsync(TEntity entity);
-        Task DeleteAsync(int id);
+        Task<string> DeleteAsync(int id);
     }
 }

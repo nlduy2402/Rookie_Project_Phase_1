@@ -37,13 +37,14 @@ namespace RetailSystem.Infrastructure.Services.Base
             return entity;
         }
 
-        public virtual async Task DeleteAsync(int id)
+        public virtual async Task<string> DeleteAsync(int id)
         {
             var entity = await GetByIdAsync(id);
-            if (entity == null) return;
+            if (entity == null) return("Not exist data to delete!");
 
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
+            return ("Deleted !");
         }
         public async Task<List<TEntity>> GetPagedAsync(int page, int pageSize)
         {
