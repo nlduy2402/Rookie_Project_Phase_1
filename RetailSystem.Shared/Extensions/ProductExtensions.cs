@@ -1,5 +1,6 @@
 ﻿using RetailSystem.Domain.Entities;
 using RetailSystem.Shared.DTOs;
+using RetailSystem.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +49,48 @@ namespace RetailSystem.Shared.Extensions
             }
 
             product.LastUpdatedAt = DateTime.UtcNow;
+        }
+
+        public static ProductViewModel ToCardVM(this Product p)
+        {
+            return new ProductViewModel
+            {
+                Id = p.Id,
+                Name = p.Name,
+                CategoryName = p.Category?.Name ?? "",
+                Price = p.Price,
+
+                ImageUrl = p.Images.FirstOrDefault()?.Url ?? "/images/no-image.png",
+
+                ChipSet = p.ChipSet,
+                RAM = p.RAM,
+                SSD = p.SSD,
+
+                Specs = new List<string>
+            {
+                p.ChipSet,
+                p.RAM,
+                p.SSD
+            }
+            };
+        }
+
+        public static ProductDetailViewModel ToDetailVM(this Product p)
+        {
+            return new ProductDetailViewModel
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                CategoryName = p.Category?.Name ?? "",
+
+                Images = p.Images.Select(i => i.Url).ToList(),
+
+                ChipSet = p.ChipSet,
+                RAM = p.RAM,
+                SSD = p.SSD
+            };
         }
     }
 }

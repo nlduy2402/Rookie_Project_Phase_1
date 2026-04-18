@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using RetailSystem.CustomerSite.Models;
 using RetailSystem.Domain.Entities;
 using RetailSystem.Infrastructure.Persistence;
-
+using RetailSystem.Infrastructure.Services.Interfaces;
+using RetailSystem.Shared.Extensions;
 namespace RetailSystem.CustomerSite.Controllers
 {
     public class HomeController : Controller
@@ -46,15 +47,22 @@ namespace RetailSystem.CustomerSite.Controllers
         //    return Content("Inserted!");
         //}
         private readonly ILogger<HomeController> _logger;
+        private readonly IProductService _productService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IProductService productService)
         {
             _logger = logger;
+            _productService = productService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var result = await _productService.GetAllProductAsync();
+            if (!result.IsSuccess) return BadRequest(result.Message);
+
+            var vm = result?.Data?.Select(p => p.ToCardVM()).ToList();
+
+            return View(vm);
         }
 
         public IActionResult Privacy()

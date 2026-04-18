@@ -40,6 +40,22 @@ namespace RetailSystem.Infrastructure.Services
             };
         }
 
+        public async Task<ServiceResult<Product>> GetProductByIdAsync(int id)
+        {
+            var product =  _context.Products
+                .Include(p => p.Images)
+                .Include(p => p.Category)
+                .FirstOrDefault(p => p.Id == id);
+            if (product == null) {
+                return new ServiceResult<Product> { IsSuccess = false, Message = "Product not exist !" };
+            }
+            return new ServiceResult<Product>()
+            {
+                IsSuccess = true,
+                Data = product
+            };
+        }
+
         public async Task<ServiceResult<Product>> UpdateAsync(UpdateProductDTO model)
         {
             var product = await _context.Products

@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@using RetailSystem.Shared.ViewModels
+
+@{
+    @model List<ProductViewModel>
+
+}
+
+<!DOCTYPE html>
 <html class="no-js" lang="zxx">
 
 <head>
@@ -26,75 +33,84 @@
             transition: 0.3s;
         }
 
-            .laptop-card:hover {
-                box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            }
+        .laptop-card:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
 
-            /* IMAGE */
-            .laptop-card .product-image {
-                background: #f5f5f5;
-                padding: 20px;
-            }
+        /* IMAGE */
+        .laptop-card .product-image {
+            background: #f5f5f5;
+            padding: 10px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-            .laptop-card img {
-                max-height: 180px;
-                object-fit: contain;
-            }
+        .laptop-card .product-image img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        } 
+        .laptop-card img {
+        max-height: 180px;
+        object-fit: contain;
+        }
 
-            /* TITLE */
-            .laptop-card .title {
-                font-size: 15px;
-                font-weight: 600;
-                min-height: 45px;
-            }
+        /* TITLE */
+        .laptop-card .title {
+        font-size: 15px;
+        font-weight: 600;
+        min-height: 45px;
+        }
 
-            /* SPECS BOX */
-            .laptop-card .specs {
-                background: #f1f1f1;
-                border-radius: 10px;
-                padding: 10px;
-                margin: 10px 0;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px 12px;
-            }
+        /* SPECS BOX */
+        .laptop-card .specs {
+        background: #f1f1f1;
+        border-radius: 10px;
+        padding: 10px;
+        margin: 10px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        }
 
-                .laptop-card .specs i {
-                    font-size: 14px;
-                    color: #666;
-                    margin-right: 4px;
-                }
+        .laptop-card .specs i {
+        font-size: 14px;
+        color: #666;
+        margin-right: 4px;
+        }
 
-                .laptop-card .specs div {
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    white-space: normal; /* cho phép xuống dòng */
-                    word-break: break-word; /* tránh tràn */
-                }
+        .laptop-card .specs div {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: normal; /* cho phép xuống dòng */
+        word-break: break-word; /* tránh tràn */
+        }
 
-            /* PRICE */
-            .laptop-card .new-price {
-                color: red;
-                font-size: 18px;
-                font-weight: bold;
-            }
+        /* PRICE */
+        .laptop-card .new-price {
+        color: red;
+        font-size: 18px;
+        font-weight: bold;
+        }
 
-            /* RATING */
-            .laptop-card .rating {
-                font-size: 14px;
-                margin-top: 5px;
-            }
+        /* RATING */
+        .laptop-card .rating {
+        font-size: 14px;
+        margin-top: 5px;
+        }
     </style>
 </head>
 
 <body>
     <!--[if lte IE 9]>
-      <p class="browserupgrade">
-        You are using an <strong>outdated</strong> browser. Please
-        <a href="https://browsehappy.com/">upgrade your browser</a> to improve
-        your experience and security.
-      </p>
+    <p class="browserupgrade">
+    You are using an <strong>outdated</strong> browser. Please
+    <a href="https://browsehappy.com/">upgrade your browser</a> to improve
+    your experience and security.
+    </p>
     <![endif]-->
     <!-- Preloader -->
     <div class="preloader">
@@ -116,12 +132,12 @@
                         <div class="hero-slider">
                             <!-- Start Single Slider -->
                             <div class="single-slider"
-                                 style="background-image: url(assets/images/hero/hero1.jpg);">
+                            style="background-image: url(assets/images/hero/hero1.jpg);">
                             </div>
                             <!-- End Single Slider -->
                             <!-- Start Single Slider -->
                             <div class="single-slider"
-                                 style="background-image: url(assets/images/hero/hero2.png);">
+                            style="background-image: url(assets/images/hero/hero2.png);">
                             </div>
                             <!-- End Single Slider -->
                         </div>
@@ -133,7 +149,7 @@
                         <div class="col-lg-12 col-md-6 col-12 md-custom-padding">
                             <!-- Start Small Banner -->
                             <div class="hero-small-banner"
-                                 style="background-image: url('assets/images/hero/hero3.webp');">
+                            style="background-image: url('assets/images/hero/hero3.webp');">
                             </div>
                             <!-- End Small Banner -->
                         </div>
@@ -168,6 +184,50 @@
                 </div>
             </div>
             <div class="row">
+                @foreach(var item in Model)
+                {
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <!-- Start Single Product -->
+                        <div class="single-product laptop-card">
+                            <div class="product-image text-center">
+                                <img src="@item.ImageUrl" alt="Laptop">
+
+                                <div class="button">
+                                    <a href="#" class="btn">
+                                        <i class="lni lni-cart"></i> Add to Cart
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="product-info">
+                                <!-- Title -->
+                                <h4 class="title">
+                                    <a asp-controller="Product"
+                                       asp-action="Detail"
+                                       asp-route-id="@item.Id">
+                                        @item.Name
+                                    </a>
+                                </h4>
+
+                                <!-- Specs -->
+                                <div class="specs">
+                                    <div><i class="bi bi-cpu"></i> @item.ChipSet </div>
+                                    <div><i class="bi bi-memory"></i> @item.RAM</div>
+                                    <div><i class="bi bi-hdd"></i> @item.SSD</div>
+                                </div>
+
+                                <!-- Price -->
+                                <div class="price">
+                                    <span class="new-price">@item.PriceFormatted </span>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <!-- End Single Product -->
+                    </div>
+                }
+
                 <div class="col-lg-3 col-md-6 col-12">
                     <!-- Start Single Product -->
                     <div class="single-product laptop-card">
@@ -377,122 +437,7 @@
         </div>
     </section>
     <!-- End Shipping Info -->
-    <!-- Start Footer Area -->
-    <footer class="footer">
 
-        <!-- Start Footer Middle -->
-        <div class="footer-middle">
-            <div class="container">
-                <div class="bottom-inner">
-                    <div class="row">
-                        <div class="col-lg-3 col-md-6 col-12">
-                            <!-- Single Widget -->
-                            <div class="single-footer f-contact">
-                                <h3>Get In Touch With Us</h3>
-                                <p class="phone">Phone: +1 (900) 33 169 7720</p>
-                                <ul>
-                                    <li><span>Monday-Friday: </span> 9.00 am - 8.00 pm</li>
-                                    <li><span>Saturday: </span> 10.00 am - 6.00 pm</li>
-                                </ul>
-                                <p class="mail">
-                                    <a href="mailto:support@shopgrids.com">support@shopgrids.com</a>
-                                </p>
-                            </div>
-                            <!-- End Single Widget -->
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-12">
-                            <!-- Single Widget -->
-                            <div class="single-footer our-app">
-                                <h3>Our Mobile App</h3>
-                                <ul class="app-btn">
-                                    <li>
-                                        <a href="javascript:void(0)">
-                                            <i class="lni lni-apple"></i>
-                                            <span class="small-title">Download on the</span>
-                                            <span class="big-title">App Store</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0)">
-                                            <i class="lni lni-play-store"></i>
-                                            <span class="small-title">Download on the</span>
-                                            <span class="big-title">Google Play</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <!-- End Single Widget -->
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-12">
-                            <!-- Single Widget -->
-                            <div class="single-footer f-link">
-                                <h3>Information</h3>
-                                <ul>
-                                    <li><a href="javascript:void(0)">About Us</a></li>
-                                    <li><a href="javascript:void(0)">Contact Us</a></li>
-                                    <li><a href="javascript:void(0)">Downloads</a></li>
-                                    <li><a href="javascript:void(0)">Sitemap</a></li>
-                                    <li><a href="javascript:void(0)">FAQs Page</a></li>
-                                </ul>
-                            </div>
-                            <!-- End Single Widget -->
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-12">
-                            <!-- Single Widget -->
-                            <div class="single-footer f-link">
-                                <h3>Shop Departments</h3>
-                                <ul>
-                                    <li><a href="javascript:void(0)">Computers & Accessories</a></li>
-                                    <li><a href="javascript:void(0)">Smartphones & Tablets</a></li>
-                                    <li><a href="javascript:void(0)">TV, Video & Audio</a></li>
-                                    <li><a href="javascript:void(0)">Cameras, Photo & Video</a></li>
-                                    <li><a href="javascript:void(0)">Headphones</a></li>
-                                </ul>
-                            </div>
-                            <!-- End Single Widget -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- End Footer Middle -->
-        <!-- Start Footer Bottom -->
-        <div class="footer-bottom">
-            <div class="container">
-                <div class="inner-content">
-                    <div class="row align-items-center">
-                        <div class="col-lg-4 col-12">
-                            <div class="payment-gateway">
-                                <span>We Accept:</span>
-                                <img src="assets/images/footer/credit-cards-footer.png" alt="#">
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-12">
-                            <div class="copyright">
-                                <p>
-                                    Designed and Developed by<a href="https://graygrids.com/" rel="nofollow"
-                                                                target="_blank">GrayGrids</a>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-12">
-                            <ul class="socila">
-                                <li>
-                                    <span>Follow Us On:</span>
-                                </li>
-                                <li><a href="javascript:void(0)"><i class="lni lni-facebook-filled"></i></a></li>
-                                <li><a href="javascript:void(0)"><i class="lni lni-twitter-original"></i></a></li>
-                                <li><a href="javascript:void(0)"><i class="lni lni-instagram"></i></a></li>
-                                <li><a href="javascript:void(0)"><i class="lni lni-google"></i></a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- End Footer Bottom -->
-    </footer>
-    <!--/ End Footer Area -->
     <!-- ========================= scroll-top ========================= -->
     <a href="#" class="scroll-top">
         <i class="lni lni-chevron-up"></i>
