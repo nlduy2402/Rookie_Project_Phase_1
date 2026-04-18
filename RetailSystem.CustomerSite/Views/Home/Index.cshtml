@@ -1,324 +1,548 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
-@* <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap-grid.css" />
-<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+﻿<!DOCTYPE html>
+<html class="no-js" lang="zxx">
 
-<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap-reboot.css" />
-<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap-utilities.css" />
-<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> *@
-<link href="~/css/product.css" rel="stylesheet" />
-<style>
-    .category-section {
-        text-align: center;
-        padding: 40px 20px;
-    }
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>ShopGrids - Bootstrap 5 eCommerce HTML Template.</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/favicon.svg" />
 
-        .category-section h2 {
-            font-size: 28px;
-            margin-bottom: 30px;
+    <!-- ========================= CSS here ========================= -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/LineIcons.3.0.css" />
+    <link rel="stylesheet" href="assets/css/tiny-slider.css" />
+    <link rel="stylesheet" href="assets/css/glightbox.min.css" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        .laptop-card {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
+            transition: 0.3s;
         }
 
-    .category-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
+            .laptop-card:hover {
+                box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            }
 
-    .category-list {
-        display: flex;
-        gap: 30px;
-        overflow: hidden;
-        scroll-behavior: smooth;
-        width: 100%;
-    }
+            /* IMAGE */
+            .laptop-card .product-image {
+                background: #f5f5f5;
+                padding: 20px;
+            }
 
-    .category-item {
-        min-width: 180px;
-        text-align: center;
-    }
+            .laptop-card img {
+                max-height: 180px;
+                object-fit: contain;
+            }
 
-    .circle {
-        width: 150px;
-        height: 150px;
-        background: #f3f3f3;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 15px;
-    }
+            /* TITLE */
+            .laptop-card .title {
+                font-size: 15px;
+                font-weight: 600;
+                min-height: 45px;
+            }
 
-        .circle img {
-            width: 70%;
-            height: auto;
-        }
+            /* SPECS BOX */
+            .laptop-card .specs {
+                background: #f1f1f1;
+                border-radius: 10px;
+                padding: 10px;
+                margin: 10px 0;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px 12px;
+            }
 
-    .category-item h4 {
-        font-size: 16px;
-        margin-bottom: 5px;
-    }
+                .laptop-card .specs i {
+                    font-size: 14px;
+                    color: #666;
+                    margin-right: 4px;
+                }
 
-    .category-item p {
-        color: gray;
-        font-size: 14px;
-    }
+                .laptop-card .specs div {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    white-space: normal; /* cho phép xuống dòng */
+                    word-break: break-word; /* tránh tràn */
+                }
 
-    /* Nút điều hướng */
-    .nav {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 1px solid #d9a48f;
-        background: white;
-        cursor: pointer;
-        position: absolute;
-        z-index: 2;
-    }
+            /* PRICE */
+            .laptop-card .new-price {
+                color: red;
+                font-size: 18px;
+                font-weight: bold;
+            }
 
-    .prev {
-        left: -10px;
-    }
+            /* RATING */
+            .laptop-card .rating {
+                font-size: 14px;
+                margin-top: 5px;
+            }
+    </style>
+</head>
 
-    .next {
-        right: -10px;
-    }
-
-    .carousel-control-prev-icon.custom-arrow, .carousel-control-next-icon.custom-arrow {
-        color:black;
-        background-color:burlywood;
-        border-radius:15px;
-    }
-
-    
-    .carousel-item {
-        border-radius: 15px;
-        overflow: hidden;
-    }
-
-    .carousel-caption {
-        text-align: left;
-        left: 10%;
-        bottom: 20%;
-    }
-
-    .carousel-inner{
-        padding-top: 5px;
-    }
-
-    .carousel.slide {
-        background-color:aliceblue;
-    }
-</style>
-
-
-<div id="carouselExampleCaptions" class="carousel slide">
-    <div class="carousel-indicators">
-        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
-        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
-    </div>
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <img src="./img/car2.webp" class="d-block w-100" alt="...">
-            <div class="carousel-caption d-none d-md-block">
-                <h5>First slide label</h5>
-                <p>Some representative placeholder content for the first slide.</p>
+<body>
+    <!--[if lte IE 9]>
+      <p class="browserupgrade">
+        You are using an <strong>outdated</strong> browser. Please
+        <a href="https://browsehappy.com/">upgrade your browser</a> to improve
+        your experience and security.
+      </p>
+    <![endif]-->
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="preloader-inner">
+            <div class="preloader-icon">
+                <span></span>
+                <span></span>
             </div>
         </div>
-        <div class="carousel-item">
-            <img src="./img/car3.jpg" class="d-block w-100" alt="...">
-            <div class="carousel-caption d-none d-md-block">
-                <h5>Second slide label</h5>
-                <p>Some representative placeholder content for the second slide.</p>
-            </div>
-        </div>
-
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-    </button>
-</div>
-<div class="container my-5">
-    <h2 class="text-center mb-4">Shop By Category</h2>
-
-    <div id="categoryCarousel" class="carousel slide" data-bs-ride="false">
-        <div class="carousel-inner">
-
-            <!-- Slide 1 -->
-            <div class="carousel-item active">
-                <div class="row justify-content-center">
-
-                    @for (int i = 0; i < 5; i++)
-                    {
-                        <div class="col-6 col-md-4 col-lg-2 text-center">
-                            <div class="category-item">
-                                <div class="circle">
-                                    <img src="/img/laptop1.jpg" class="img-fluid" />
+    <!-- /End Preloader -->
+    <!-- Start Hero Area -->
+    <section class="hero-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-12 custom-padding-right">
+                    <div class="slider-head">
+                        <!-- Start Hero Slider -->
+                        <div class="hero-slider">
+                            <!-- Start Single Slider -->
+                            <div class="single-slider"
+                                 style="background-image: url(assets/images/hero/hero1.jpg);">
+                            </div>
+                            <!-- End Single Slider -->
+                            <!-- Start Single Slider -->
+                            <div class="single-slider"
+                                 style="background-image: url(assets/images/hero/hero2.png);">
+                            </div>
+                            <!-- End Single Slider -->
+                        </div>
+                        <!-- End Hero Slider -->
+                    </div>
+                </div>
+                <div class="col-lg-4 col-12">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-6 col-12 md-custom-padding">
+                            <!-- Start Small Banner -->
+                            <div class="hero-small-banner"
+                                 style="background-image: url('assets/images/hero/hero3.webp');">
+                            </div>
+                            <!-- End Small Banner -->
+                        </div>
+                        <div class="col-lg-12 col-md-6 col-12">
+                            <!-- Start Small Banner -->
+                            <div class="hero-small-banner style2">
+                                <div class="content">
+                                    <h2>Weekly Sale!</h2>
+                                    <p>Saving up to 50% off all online store items this week.</p>
+                                    <div class="button">
+                                        <a class="btn" href="product-grids.html">Shop Now</a>
+                                    </div>
                                 </div>
-                                <h6 class="mt-3">Laptop</h6>
+                            </div>
+                            <!-- Start Small Banner -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End Hero Area -->
+    <!-- Start Trending Product Area -->
+    <section class="trending-product section" style="margin-top: 12px;">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="section-title">
+                        <h2>Featured Product</h2>
+                        <p>There are many variations of passages of Lorem Ipsum available.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-12">
+                    <!-- Start Single Product -->
+                    <div class="single-product laptop-card">
+                        <div class="product-image text-center">
+                            <img src="assets/images/products/product-8.jpg" alt="Laptop">
+
+                            <div class="button">
+                                <a href="#" class="btn">
+                                    <i class="lni lni-cart"></i> Add to Cart
+                                </a>
                             </div>
                         </div>
-                    }
 
+                        <div class="product-info">
+                            <!-- Title -->
+                            <h4 class="title">
+                                <a href="#">
+                                    Laptop gaming Acer Nitro ProPanel ANV16-72-71T9
+                                </a>
+                            </h4>
+
+                            <!-- Specs -->
+                            <div class="specs">
+                                <div><i class="bi bi-cpu"></i> Intel Core Ultra 5 125U </div>
+                                <div><i class="bi bi-memory"></i> 16 GB DDR5-5600 MHz RAM</div>
+                                <div><i class="bi bi-hdd"></i> 512 GB PCI NVMe SSD</div>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="price">
+                                <span class="new-price">40.990.000đ</span>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <!-- End Single Product -->
                 </div>
-            </div>
 
-            <!-- Slide 2 (copy nếu cần) -->
-            <div class="carousel-item">
-                <div class="row justify-content-center">
-                    @for (int i = 0; i < 5; i++)
-                    {
-                        <div class="col-6 col-md-4 col-lg-2 text-center">
-                            <div class="category-item">
-                                <div class="circle">
-                                    <img src="/img/category2.webp" class="img-fluid" />
-                                </div>
-                                <h6 class="mt-3">Beauty</h6>
+                <div class="col-lg-3 col-md-6 col-12">
+                    <!-- Start Single Product -->
+                    <div class="single-product laptop-card">
+                        <div class="product-image text-center">
+                            <img src="assets/images/products/product-8.jpg" alt="Laptop">
+
+                            <div class="button">
+                                <a href="#" class="btn">
+                                    <i class="lni lni-cart"></i> Add to Cart
+                                </a>
                             </div>
                         </div>
-                    }
-                </div>
-            </div>
 
-        </div>
+                        <div class="product-info">
+                            <!-- Title -->
+                            <h4 class="title">
+                                <a href="#">
+                                    Laptop gaming Acer Nitro ProPanel ANV16-72-71T9
+                                </a>
+                            </h4>
 
-        <!-- Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#categoryCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon custom-arrow"></span>
-        </button>
+                            <!-- Specs -->
+                            <div class="specs">
+                                <div><i class="bi bi-cpu"></i> Intel Core Ultra 5 125U </div>
+                                <div><i class="bi bi-memory"></i> 16 GB DDR5-5600 MHz RAM</div>
+                                <div><i class="bi bi-hdd"></i> 512 GB PCI NVMe SSD</div>
+                            </div>
 
-        <button class="carousel-control-next" type="button" data-bs-target="#categoryCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon custom-arrow"></span>
-        </button>
-    </div>
-</div>
+                            <!-- Price -->
+                            <div class="price">
+                                <span class="new-price">40.990.000đ</span>
+                            </div>
 
-<div class="container my-5">
-    <h2 class="text-center mb-4">Featured Product</h2>
-    <div class="shop-product-grid" id="products-grid">
-        <div class="card">
-            <div class="badge">HOT SALE</div>
-            <div class="tilt">
-                <div class="img"><img src="https://images.unsplash.com/photo-1544237526-cae15a57ed1e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDkwNDY5NjB8&ixlib=rb-4.1.0&q=85" alt="Premium Laptop"></div>
-            </div>
-            <div class="info">
-                <div class="cat">High-Performance Laptop</div>
-                <h2 class="title">UltraBook Pro X</h2>
-                <p class="desc">Cutting-edge performance with Intel Core i9, 32GB RAM, and a 1TB SSD in a sleek, lightweight design.</p>
-                <div class="feats">
-                    <span class="feat">4K Display</span>
-                    <span class="feat">16-Hour Battery</span>
-                    <span class="feat">Thunderbolt 4</span>
-                </div>
-                <div class="bottom">
-                    <div class="price">
-                        <span class="old">$2,499</span>
-                        <span class="new">$1,999</span>
+
+                        </div>
                     </div>
-                    <button class="btn">
-                        <span>Add to Cart</span>
-                    </button>
+                    <!-- End Single Product -->
                 </div>
-            </div>
-        </div>
 
-        <div class="card">
-            <div class="badge">HOT SALE</div>
-            <div class="tilt">
-                <div class="img"><img src="https://images.unsplash.com/photo-1544237526-cae15a57ed1e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDkwNDY5NjB8&ixlib=rb-4.1.0&q=85" alt="Premium Laptop"></div>
-            </div>
-            <div class="info">
-                <div class="cat">High-Performance Laptop</div>
-                <h2 class="title">UltraBook Pro X</h2>
-                <p class="desc">Cutting-edge performance with Intel Core i9, 32GB RAM, and a 1TB SSD in a sleek, lightweight design.</p>
-                <div class="feats">
-                    <span class="feat">4K Display</span>
-                    <span class="feat">16-Hour Battery</span>
-                    <span class="feat">Thunderbolt 4</span>
-                </div>
-                <div class="bottom">
-                    <div class="price">
-                        <span class="old">$2,499</span>
-                        <span class="new">$1,999</span>
+                <div class="col-lg-3 col-md-6 col-12">
+                    <!-- Start Single Product -->
+                    <div class="single-product laptop-card">
+                        <div class="product-image text-center">
+                            <img src="assets/images/products/product-8.jpg" alt="Laptop">
+
+                            <div class="button">
+                                <a href="#" class="btn">
+                                    <i class="lni lni-cart"></i> Add to Cart
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="product-info">
+                            <!-- Title -->
+                            <h4 class="title">
+                                <a href="#">
+                                    Laptop gaming Acer Nitro ProPanel ANV16-72-71T9
+                                </a>
+                            </h4>
+
+                            <!-- Specs -->
+                            <div class="specs">
+                                <div><i class="bi bi-cpu"></i> Intel Core Ultra 5 125U </div>
+                                <div><i class="bi bi-memory"></i> 16 GB DDR5-5600 MHz RAM</div>
+                                <div><i class="bi bi-hdd"></i> 512 GB PCI NVMe SSD</div>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="price">
+                                <span class="new-price">40.990.000đ</span>
+                            </div>
+
+
+                        </div>
                     </div>
-                    <button class="btn">
-                        <span>Add to Cart</span>
-                    </button>
+                    <!-- End Single Product -->
                 </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="badge">HOT SALE</div>
-            <div class="tilt">
-                <div class="img"><img src="https://images.unsplash.com/photo-1544237526-cae15a57ed1e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDkwNDY5NjB8&ixlib=rb-4.1.0&q=85" alt="Premium Laptop"></div>
-            </div>
-            <div class="info">
-                <div class="cat">High-Performance Laptop</div>
-                <h2 class="title">UltraBook Pro X</h2>
-                <p class="desc">Cutting-edge performance with Intel Core i9, 32GB RAM, and a 1TB SSD in a sleek, lightweight design.</p>
-                <div class="feats">
-                    <span class="feat">4K Display</span>
-                    <span class="feat">16-Hour Battery</span>
-                    <span class="feat">Thunderbolt 4</span>
-                </div>
-                <div class="bottom">
-                    <div class="price">
-                        <span class="old">$2,499</span>
-                        <span class="new">$1,999</span>
+
+                <div class="col-lg-3 col-md-6 col-12">
+                    <!-- Start Single Product -->
+                    <div class="single-product laptop-card">
+                        <div class="product-image text-center">
+                            <img src="assets/images/products/product-8.jpg" alt="Laptop">
+
+                            <div class="button">
+                                <a href="#" class="btn">
+                                    <i class="lni lni-cart"></i> Add to Cart
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="product-info">
+                            <!-- Title -->
+                            <h4 class="title">
+                                <a href="#">
+                                    Laptop gaming Acer Nitro ProPanel ANV16-72-71T9
+                                </a>
+                            </h4>
+
+                            <!-- Specs -->
+                            <div class="specs">
+                                <div><i class="bi bi-cpu"></i> Intel Core Ultra 5 125U </div>
+                                <div><i class="bi bi-memory"></i> 16 GB DDR5-5600 MHz RAM</div>
+                                <div><i class="bi bi-hdd"></i> 512 GB PCI NVMe SSD</div>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="price">
+                                <span class="new-price">40.990.000đ</span>
+                            </div>
+
+
+                        </div>
                     </div>
-                    <button class="btn">
-                        <span>Add to Cart</span>
-                    </button>
+                    <!-- End Single Product -->
                 </div>
+
+
             </div>
         </div>
-        <div class="card">
-            <div class="badge">HOT SALE</div>
-            <div class="tilt">
-                <div class="img"><img src="https://res.cloudinary.com/dsqqhlj3e/image/upload/q_auto/f_auto/v1776407518/Asus%20ExpertBook%20P1503CVA-S72922W/unnamed_wx8owh.webp" alt="Premium Laptop"></div>
-            </div>
-            <div class="info">
-                <div class="cat">High-Performance Laptop</div>
-                <h2 class="title">UltraBook Pro X</h2>
-                <p class="desc">Cutting-edge performance with Intel Core i9, 32GB RAM, and a 1TB SSD in a sleek, lightweight design.</p>
-                <div class="feats">
-                    <span class="feat">4K Display</span>
-                    <span class="feat">16-Hour Battery</span>
-                    <span class="feat">Thunderbolt 4</span>
-                </div>
-                <div class="bottom">
-                    <div class="price">
-                        <span class="old">$2,499</span>
-                        <span class="new">$1,999</span>
+    </section>
+    <!-- End Trending Product Area -->
+    <!-- Start Shipping Info -->
+    <section class="shipping-info">
+        <div class="container">
+            <ul>
+                <!-- Free Shipping -->
+                <li>
+                    <div class="media-icon">
+                        <i class="lni lni-delivery"></i>
                     </div>
-                    <button class="btn">
-                        <span>Add to Cart</span>
-                    </button>
+                    <div class="media-body">
+                        <h5>Free Shipping</h5>
+                        <span>On order over $99</span>
+                    </div>
+                </li>
+                <!-- Money Return -->
+                <li>
+                    <div class="media-icon">
+                        <i class="lni lni-support"></i>
+                    </div>
+                    <div class="media-body">
+                        <h5>24/7 Support.</h5>
+                        <span>Live Chat Or Call.</span>
+                    </div>
+                </li>
+                <!-- Support 24/7 -->
+                <li>
+                    <div class="media-icon">
+                        <i class="lni lni-credit-cards"></i>
+                    </div>
+                    <div class="media-body">
+                        <h5>Online Payment.</h5>
+                        <span>Secure Payment Services.</span>
+                    </div>
+                </li>
+                <!-- Safe Payment -->
+                <li>
+                    <div class="media-icon">
+                        <i class="lni lni-reload"></i>
+                    </div>
+                    <div class="media-body">
+                        <h5>Easy Return.</h5>
+                        <span>Hassle Free Shopping.</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </section>
+    <!-- End Shipping Info -->
+    <!-- Start Footer Area -->
+    <footer class="footer">
+
+        <!-- Start Footer Middle -->
+        <div class="footer-middle">
+            <div class="container">
+                <div class="bottom-inner">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <!-- Single Widget -->
+                            <div class="single-footer f-contact">
+                                <h3>Get In Touch With Us</h3>
+                                <p class="phone">Phone: +1 (900) 33 169 7720</p>
+                                <ul>
+                                    <li><span>Monday-Friday: </span> 9.00 am - 8.00 pm</li>
+                                    <li><span>Saturday: </span> 10.00 am - 6.00 pm</li>
+                                </ul>
+                                <p class="mail">
+                                    <a href="mailto:support@shopgrids.com">support@shopgrids.com</a>
+                                </p>
+                            </div>
+                            <!-- End Single Widget -->
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <!-- Single Widget -->
+                            <div class="single-footer our-app">
+                                <h3>Our Mobile App</h3>
+                                <ul class="app-btn">
+                                    <li>
+                                        <a href="javascript:void(0)">
+                                            <i class="lni lni-apple"></i>
+                                            <span class="small-title">Download on the</span>
+                                            <span class="big-title">App Store</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0)">
+                                            <i class="lni lni-play-store"></i>
+                                            <span class="small-title">Download on the</span>
+                                            <span class="big-title">Google Play</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- End Single Widget -->
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <!-- Single Widget -->
+                            <div class="single-footer f-link">
+                                <h3>Information</h3>
+                                <ul>
+                                    <li><a href="javascript:void(0)">About Us</a></li>
+                                    <li><a href="javascript:void(0)">Contact Us</a></li>
+                                    <li><a href="javascript:void(0)">Downloads</a></li>
+                                    <li><a href="javascript:void(0)">Sitemap</a></li>
+                                    <li><a href="javascript:void(0)">FAQs Page</a></li>
+                                </ul>
+                            </div>
+                            <!-- End Single Widget -->
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <!-- Single Widget -->
+                            <div class="single-footer f-link">
+                                <h3>Shop Departments</h3>
+                                <ul>
+                                    <li><a href="javascript:void(0)">Computers & Accessories</a></li>
+                                    <li><a href="javascript:void(0)">Smartphones & Tablets</a></li>
+                                    <li><a href="javascript:void(0)">TV, Video & Audio</a></li>
+                                    <li><a href="javascript:void(0)">Cameras, Photo & Video</a></li>
+                                    <li><a href="javascript:void(0)">Headphones</a></li>
+                                </ul>
+                            </div>
+                            <!-- End Single Widget -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<script>
-    const list = document.querySelector('.category-list');
-    const next = document.querySelector('.next');
-    const prev = document.querySelector('.prev');
+        <!-- End Footer Middle -->
+        <!-- Start Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="inner-content">
+                    <div class="row align-items-center">
+                        <div class="col-lg-4 col-12">
+                            <div class="payment-gateway">
+                                <span>We Accept:</span>
+                                <img src="assets/images/footer/credit-cards-footer.png" alt="#">
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-12">
+                            <div class="copyright">
+                                <p>
+                                    Designed and Developed by<a href="https://graygrids.com/" rel="nofollow"
+                                                                target="_blank">GrayGrids</a>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-12">
+                            <ul class="socila">
+                                <li>
+                                    <span>Follow Us On:</span>
+                                </li>
+                                <li><a href="javascript:void(0)"><i class="lni lni-facebook-filled"></i></a></li>
+                                <li><a href="javascript:void(0)"><i class="lni lni-twitter-original"></i></a></li>
+                                <li><a href="javascript:void(0)"><i class="lni lni-instagram"></i></a></li>
+                                <li><a href="javascript:void(0)"><i class="lni lni-google"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Footer Bottom -->
+    </footer>
+    <!--/ End Footer Area -->
+    <!-- ========================= scroll-top ========================= -->
+    <a href="#" class="scroll-top">
+        <i class="lni lni-chevron-up"></i>
+    </a>
 
-    next.onclick = () => {
-        list.scrollBy({ left: 200, behavior: 'smooth' });
-    };
+    <!-- ========================= JS here ========================= -->
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/tiny-slider.js"></script>
+    <script src="assets/js/glightbox.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script type="text/javascript">
+        //========= Hero Slider
+        tns({
+            container: '.hero-slider',
+            slideBy: 'page',
+            autoplay: true,
+            autoplayButtonOutput: false,
+            mouseDrag: true,
+            gutter: 0,
+            items: 1,
+            nav: false,
+            controls: true,
+            controlsText: ['<i class="lni lni-chevron-left"></i>', '<i class="lni lni-chevron-right"></i>'],
+        });
 
-    prev.onclick = () => {
-        list.scrollBy({ left: -200, behavior: 'smooth' });
-    };
-</script>
+        //======== Brand Slider
+        tns({
+            container: '.brands-logo-carousel',
+            autoplay: true,
+            autoplayButtonOutput: false,
+            mouseDrag: true,
+            gutter: 15,
+            nav: false,
+            controls: false,
+            responsive: {
+                0: {
+                    items: 1,
+                },
+                540: {
+                    items: 3,
+                },
+                768: {
+                    items: 5,
+                },
+                992: {
+                    items: 6,
+                }
+            }
+        });
+    </script>
+</body>
 
-
-
-
+</html>
