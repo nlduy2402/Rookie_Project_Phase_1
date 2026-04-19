@@ -20,6 +20,10 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<ICategoryService, CategoryService > ();
 builder.Services.AddScoped<IProductService,ProductService>();
 
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+// .
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -41,7 +45,7 @@ if (app.Environment.IsDevelopment())
                .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
     });
 }
-
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
