@@ -42,10 +42,10 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<ServiceResult<Product>> GetProductByIdAsync(int id)
         {
-            var product =  _context.Products
+            var product =  await _context.Products
                 .Include(p => p.Images)
                 .Include(p => p.Category)
-                .FirstOrDefault(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (product == null) {
                 return new ServiceResult<Product> { IsSuccess = false, Message = "Product not exist !" };
             }

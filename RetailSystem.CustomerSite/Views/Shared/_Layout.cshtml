@@ -57,7 +57,7 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-4 col-12">
+@*                     <div class="col-lg-4 col-md-4 col-12">
                         <div class="top-end">
                             <div class="user">
                                 <i class="lni lni-user"></i>
@@ -65,12 +65,48 @@
                             </div>
                             <ul class="user-login">
                                 <li>
-                                    <a href="login.html">Sign In</a>
+                                    <a asp-controller="Account" asp-action="Login">Sign In</a>
                                 </li>
                                 <li>
-                                    <a href="register.html">Register</a>
+                                    <a asp-controller="Account" asp-action="Register">Register</a>
                                 </li>
                             </ul>
+                        </div>
+                    </div> *@
+                    <div class="col-lg-4 col-md-4 col-12">
+                        <div class="top-end">
+
+                            <div class="user">
+                                <i class="lni lni-user"></i>
+
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <span>Hello @User.Identity.Name</span>
+                                }
+                                else
+                                {
+                                    <span></span>
+                                }
+                            </div>
+
+                            <ul class="user-login">
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <li>
+                                        <a asp-controller="Account" asp-action="Logout">Logout</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li>
+                                        <a asp-controller="Account" asp-action="Login">Sign In</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Account" asp-action="Register">Register</a>
+                                    </li>
+                                }
+                            </ul>
+
                         </div>
                     </div>
                 </div>

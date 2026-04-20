@@ -3,6 +3,7 @@ using RetailSystem.Infrastructure.Persistence;
 using Scalar.AspNetCore;
 using RetailSystem.Infrastructure.Services;
 using RetailSystem.Infrastructure.Services.Interfaces;
+using RetailSystem.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -17,7 +18,24 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter()
         );
     });
-builder.Services.AddScoped<ICategoryService, CategoryService > ();
+builder.Services.Configure<JwtSetting>(
+    builder.Configuration.GetSection("Jwt"));
+//builder.Services.AddAuthentication()
+//    .AddJwtBearer(options =>
+//    {
+//        var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidIssuer = jwtSettings.Issuer,
+//            ValidAudience = jwtSettings.Audience,
+//            IssuerSigningKey = new SymmetricSecurityKey(
+//                Encoding.UTF8.GetBytes(jwtSettings.Secret))
+//        };
+//    });
+
+
+builder.Services.AddScoped<ICategoryService, CategoryService> ();
 builder.Services.AddScoped<IProductService,ProductService>();
 
 builder.Services.AddCors(options => {

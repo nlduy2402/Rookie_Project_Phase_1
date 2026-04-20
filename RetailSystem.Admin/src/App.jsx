@@ -3,7 +3,7 @@ import { Layout, Menu, Table, Form, Input, Button, Modal, Space } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-const { Sider, Header, Content, Footer } = Layout;
+const { Header, Content, Footer } = Layout;
 
 const App = () => {
   const [categories, setCategories] = useState([]); // Đổi users thành categories cho đúng nghĩa
@@ -11,12 +11,10 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [form] = Form.useForm();
 
-  // 1. Gọi API khi component mount
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  // 2. Cập nhật form khi currentUser thay đổi (để Edit hiện dữ liệu cũ)
   useEffect(() => {
     if (currentUser) {
       form.setFieldsValue(currentUser);
@@ -72,7 +70,6 @@ const App = () => {
 
   return (
     <Layout style={{ minHeight: "100vh", width: "100%" }}>
-      
       <Header style={{ width: "100%" }}>
         <Menu
           theme="dark"
