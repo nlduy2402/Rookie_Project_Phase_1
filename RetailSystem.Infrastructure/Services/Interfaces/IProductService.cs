@@ -14,5 +14,7 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
         Task<ServiceResult<Product>> GetProductByIdAsync(int id);
         Task<ServiceResult<Product>> CreateAsync(CreateProductDTO model);
         Task<ServiceResult<Product>> UpdateAsync(UpdateProductDTO model);
+        Task<ServiceResult<List<Product>>> GetByCategory(int id);
+
     }
 }

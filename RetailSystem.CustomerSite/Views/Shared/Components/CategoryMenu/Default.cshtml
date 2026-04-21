@@ -1,0 +1,89 @@
+﻿@using RetailSystem.Domain.Entities;
+@model List<Category>
+
+ <style>
+    .dropdown-menu {
+        background-color: #fff;
+    }
+
+    .dropdown-item {
+        color: #212529 !important; /* màu chữ tối */
+    }
+
+        .dropdown-item:hover {
+            background-color: #f1f1f1;
+            color: #0d6efd;
+        }
+    .custom-dropdown {
+        border-radius: 10px;
+        padding: 8px 0;
+        border: none;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        min-width: 220px;
+    }
+
+        /* Item */
+        .custom-dropdown .dropdown-item {
+            padding: 10px 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            /* Hover effect */
+            .custom-dropdown .dropdown-item:hover {
+                background-color: #f8f9fa;
+                color: #0d6efd;
+                padding-left: 20px;
+            }
+
+    /* Smooth animation */
+    .dropdown-menu {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.2s ease;
+    }
+
+        /* Khi mở */
+        .dropdown-menu.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    .custom-dropdown .dropdown-item {
+        border-radius: 6px;
+        margin: 2px 8px;
+    }
+
+        .custom-dropdown .dropdown-item:hover {
+            background-color: #eef4ff;
+            color: #0d6efd;
+        }
+ </style>
+
+<!-- Start Navbar -->
+
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle"
+        href="#"
+        role="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Category
+    </a>
+
+    <ul class="dropdown-menu custom-dropdown">
+        @foreach (var cat in Model)
+        {
+            <li>
+                <a class="dropdown-item"
+                    asp-controller="Product"
+                    asp-action="ByCategory"
+                    asp-route-id="@cat.Id">
+                    @cat.Name
+                </a>
+            </li>
+        }
+    </ul>
+</li>
+
+<!-- End Navbar -->

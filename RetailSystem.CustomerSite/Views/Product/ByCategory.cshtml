@@ -1,0 +1,67 @@
+﻿@using RetailSystem.Shared.ViewModels
+@model List<ProductViewModel>
+
+<section class="trending-product section" style="margin-top: 12px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-title">
+                    <h2>@ViewBag.CategoryName</h2>
+                    <p>@ViewBag.CategoryDescription</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <!-- Start Single Product -->
+                        <div class="single-product laptop-card">
+                            <div class="product-image text-center">
+                                <img src="@item.ImageUrl" alt="Laptop">
+
+                                <div class="button">
+                                    <a href="#" class="btn">
+                                        <i class="lni lni-cart"></i> Add to Cart
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="product-info">
+                                <!-- Title -->
+                                <h4 class="title">
+                                    <a asp-controller="Product"
+                                    asp-action="Detail"
+                                    asp-route-id="@item.Id">
+                                        @item.Name
+                                    </a>
+                                </h4>
+
+                                <!-- Specs -->
+                                <div class="specs">
+                                    <div><i class="bi bi-cpu"></i> @item.ChipSet </div>
+                                    <div><i class="bi bi-memory"></i> @item.RAM</div>
+                                    <div><i class="bi bi-hdd"></i> @item.SSD</div>
+                                </div>
+
+                                <!-- Price -->
+                                <div class="price">
+                                    <span class="new-price">@item.PriceFormatted </span>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <!-- End Single Product -->
+                    </div>
+                }
+            } else
+            {
+                <p>No product in this category</p>
+
+            }
+        </div>
+    </div>
+</section>

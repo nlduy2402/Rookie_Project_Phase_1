@@ -34,18 +34,47 @@ namespace RetailSystem.Infrastructure.Services
             await _context.SaveChangesAsync();
             return category;
         }
-
-        public async Task<ServiceResult<Category>> UpdateAsync(int id, UpdateCategoryDTO model)
+        public async new Task<ServiceResult<Category>> GetByIdAsync(int id)
         {
-            var category = await GetByIdAsync(id);
+            var category = await _dbSet.FindAsync(id);
             if (category == null)
             {
                 return new ServiceResult<Category> { IsSuccess = false, Message = "Data not found" };
             }
-            category.Name = model.Name;
-            category.Description = model.Description;
-            await _context.SaveChangesAsync();
             return new ServiceResult<Category> { IsSuccess = true, Data = category };
         }
+        public async Task<ServiceResult<Category>> UpdateAsync(int id, UpdateCategoryDTO model)
+        {
+            var result = await GetByIdAsync(id);
+
+            if (!result.IsSuccess || result.Data == null)
+            {
+                return new ServiceResult<Category>
+                {
+                    IsSuccess = false,
+                    Message = "Data not found"
+                };
+            }
+
+            var category = result.Data;
+
+            category.Name = model.Name;
+            category.Description = model.Description;
+
+            await _context.SaveChangesAsync();
+
+            return new ServiceResult<Category>
+            {
+                IsSuccess = true,
+                Data = category
+            };
+        }
+
+
+
+
+
+
+
     }
 }

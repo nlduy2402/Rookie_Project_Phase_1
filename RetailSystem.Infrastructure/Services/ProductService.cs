@@ -104,5 +104,27 @@ namespace RetailSystem.Infrastructure.Services
             await _context.SaveChangesAsync();
             return new ServiceResult<Product>() { IsSuccess = false, Message = "Product Created!", Data=product };
         }
+
+        public async Task<ServiceResult<List<Product>>> GetByCategory(int id)
+        {
+            var products = await _context.Products
+                        .Where(p => p.CategoryId == id)
+                        .Include(p => p.Images)
+                        .Include(p => p.Category)
+                        .ToListAsync();
+            if (products == null || products.Count == 0)
+            {
+                return new ServiceResult<List<Product>>()
+                {
+                    IsSuccess = true,
+                    Message = "No product found in this category!"
+                };
+            }
+            return new ServiceResult<List<Product>>()
+            {
+                IsSuccess = true,
+                Data = products
+            };
+        }
     }
 }
