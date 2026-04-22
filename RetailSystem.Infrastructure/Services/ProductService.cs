@@ -58,9 +58,7 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<ServiceResult<Product>> UpdateAsync(UpdateProductDTO model)
         {
-            var product = await _context.Products
-                .Include(p => p.Images)
-                .FirstOrDefaultAsync(p => p.Id == model.Id);
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == model.Id);
             if (product == null)
             {
                 return new ServiceResult<Product>() { IsSuccess = false, Message = "Data not found!" };

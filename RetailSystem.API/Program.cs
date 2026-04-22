@@ -39,7 +39,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService> ();
 builder.Services.AddScoped<IProductService,ProductService>();
 
 builder.Services.AddCors(options => {
-    options.AddPolicy("AllowAll", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("AllowAll", builder => builder.WithOrigins("https://localhost:5173").AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 // .
 builder.Services.AddControllers();

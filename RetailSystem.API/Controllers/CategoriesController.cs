@@ -20,9 +20,12 @@ namespace RetailSystem.API.Controllers
         {
             return Ok(await _categoryService.GetAllAsync());
         }
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id) {
-            return Ok(await _categoryService.GetByIdAsync(id));
+            var result = await _categoryService.GetByIdAsync(id);
+            if (!result.IsSuccess) return NotFound(result.Message);
+
+            return Ok(result.Data);
         }
         [HttpPost]
         public async Task<IActionResult> Create(CreateCategoryDTO model)
@@ -37,7 +40,7 @@ namespace RetailSystem.API.Controllers
             throw new Exception("Bad Request");
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UpdateCategoryDTO model)
         {
             try
@@ -52,7 +55,7 @@ namespace RetailSystem.API.Controllers
             throw new Exception("Bad Request");
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             if (id <= 0)

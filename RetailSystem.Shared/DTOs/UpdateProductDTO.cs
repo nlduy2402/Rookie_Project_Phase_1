@@ -27,9 +27,6 @@ namespace RetailSystem.Shared.DTOs
         public string? ChipSet { get; set; } 
         public string? RAM { get; set; }
         public string? SSD { get; set; } 
-
-
-        public List<string>? ImageUrls { get; set; }
         public int? CategoryId { get; set; }
     }
 }

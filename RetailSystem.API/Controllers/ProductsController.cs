@@ -47,9 +47,10 @@ namespace RetailSystem.API.Controllers
             return Ok(result.Data);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateAsync(UpdateProductDTO model)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAsync(int id,UpdateProductDTO model)
         {
+            Console.WriteLine($"Received Update Request for Product ID: {model.Id} ================================================");
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var result = await _productService.UpdateAsync(model);

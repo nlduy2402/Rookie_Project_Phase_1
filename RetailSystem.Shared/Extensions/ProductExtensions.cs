@@ -37,17 +37,6 @@ namespace RetailSystem.Shared.Extensions
             if (dto.CategoryId.HasValue)
                 product.CategoryId = dto.CategoryId.Value;
 
-            if (dto.ImageUrls != null)
-            {
-                product.Images.Clear();
-
-                product.Images = dto.ImageUrls
-                    .Select(url => new ProductImage
-                    {
-                        Url = url
-                    }).ToList();
-            }
-
             product.LastUpdatedAt = DateTime.UtcNow;
         }
 
