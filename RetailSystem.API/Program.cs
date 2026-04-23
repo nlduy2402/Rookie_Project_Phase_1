@@ -4,6 +4,9 @@ using Scalar.AspNetCore;
 using RetailSystem.Infrastructure.Services;
 using RetailSystem.Infrastructure.Services.Interfaces;
 using RetailSystem.Shared;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -18,25 +21,35 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter()
         );
     });
-builder.Services.Configure<JwtSetting>(
-    builder.Configuration.GetSection("Jwt"));
-//builder.Services.AddAuthentication()
-//    .AddJwtBearer(options =>
-//    {
-//        var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidIssuer = jwtSettings.Issuer,
-//            ValidAudience = jwtSettings.Audience,
-//            IssuerSigningKey = new SymmetricSecurityKey(
-//                Encoding.UTF8.GetBytes(jwtSettings.Secret))
-//        };
-//    });
+
+var jwt = builder.Configuration.GetSection("Jwt");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+
+        ValidIssuer = jwt["Issuer"],
+        ValidAudience = jwt["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwt["Key"]!)
+        )
+    };
+});
+
+builder.Services.AddAuthorization();
+
 
 
 builder.Services.AddScoped<ICategoryService, CategoryService> ();
 builder.Services.AddScoped<IProductService,ProductService>();
+builder.Services.AddScoped<IAdminService,AdminService>();
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowAll", builder => builder.WithOrigins("https://localhost:5173").AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());

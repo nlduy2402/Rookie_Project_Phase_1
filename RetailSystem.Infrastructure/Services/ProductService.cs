@@ -100,7 +100,7 @@ namespace RetailSystem.Infrastructure.Services
             };
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            return new ServiceResult<Product>() { IsSuccess = false, Message = "Product Created!", Data=product };
+            return new ServiceResult<Product>() { IsSuccess = true, Message = "Product Created!", Data=product };
         }
 
         public async Task<ServiceResult<List<Product>>> GetByCategory(int id)
@@ -122,6 +122,27 @@ namespace RetailSystem.Infrastructure.Services
             {
                 IsSuccess = true,
                 Data = products
+            };
+        }
+        public async new Task<ServiceResult<bool>> DeleteAsync(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null)
+            {
+                return new ServiceResult<bool>
+                {
+                    IsSuccess = false,
+                    Message = "Product not found"
+                };
+            }
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
+            return new ServiceResult<bool>
+            {
+                IsSuccess = true
             };
         }
     }

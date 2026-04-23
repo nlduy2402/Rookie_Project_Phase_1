@@ -14,7 +14,7 @@ namespace RetailSystem.Infrastructure.Persistence
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
-        public DbSet<UserToken> UserTokens { get; set; }
+        public DbSet<AdminAccount> AdminAccounts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +40,16 @@ namespace RetailSystem.Infrastructure.Persistence
                 .WithMany()
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AdminAccount>().HasData(
+                new AdminAccount
+                {
+                    Id = 1,
+                    Username = "admin",
+                    PasswordHash = "123",
+                    Role = "Admin"
+                }
+            );
         }
     }
 }

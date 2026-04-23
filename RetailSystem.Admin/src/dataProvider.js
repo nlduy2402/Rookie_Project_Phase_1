@@ -1,8 +1,4 @@
-import axios from "axios";
-
-const api = axios.create({
-  baseURL: "https://localhost:7260/api",
-});
+import api from "./api/axiosClient";
 
 const mapId = (item) => ({
   ...item,

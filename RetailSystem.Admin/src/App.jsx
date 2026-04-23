@@ -10,9 +10,11 @@ import CategoryEdit from "./pages/categories/categoryEdit";
 import dataProvider from "./dataProvider";
 import ProductList from "./pages/products/ProductList";
 import ProductEdit from "./pages/products/ProductEdit";
+import ProductCreate from "./pages/products/ProductCreate";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import { ProductionQuantityLimitsRounded } from "@mui/icons-material";
-
+import { authProvider } from "./authProvider";
+import LoginPage from "./pages/auth/Login";
 // const App = () => {
 //   const [categories, setCategories] = useState([]); // Đổi users thành categories cho đúng nghĩa
 //   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -134,13 +136,14 @@ import { ProductionQuantityLimitsRounded } from "@mui/icons-material";
 
 const App = () => {
   return (
-    <Admin dataProvider={dataProvider}>
+    <Admin dataProvider={dataProvider} authProvider={authProvider} loginPage={LoginPage}>
       <Resource name="categories" list={CategoryList} edit={CategoryEdit} />
       <Resource
         icon={ProductionQuantityLimitsRounded}
         name="products"
         list={ProductList}
         edit={ProductEdit}
+        create={ProductCreate}
       />
     </Admin>
   );

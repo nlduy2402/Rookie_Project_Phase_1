@@ -26,7 +26,7 @@ builder.Services.Configure<JwtSetting>(
 
 builder.Services.AddScoped<IProductService,ProductService>();
 builder.Services.AddScoped<ICategoryService,CategoryService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 var app = builder.Build();
 

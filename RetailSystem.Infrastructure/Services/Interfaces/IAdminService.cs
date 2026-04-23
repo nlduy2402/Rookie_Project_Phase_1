@@ -1,4 +1,5 @@
 ﻿using RetailSystem.Domain.Entities;
+using RetailSystem.Shared.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,9 @@ using System.Threading.Tasks;
 
 namespace RetailSystem.Infrastructure.Services.Interfaces
 {
-    public interface ITokenService
+    public interface IAdminService : IBaseService<AdminAccount>
     {
-        Task SaveTokenAsync(User user, string accessToken, string refreshToken);
+        string GenerateToken(AdminAccount admin);
+        Task<ServiceResult<string>> LoginAsync(LoginDTO model);   
     }
 }

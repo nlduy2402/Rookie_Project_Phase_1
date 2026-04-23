@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RetailSystem.Infrastructure.Services;
 using RetailSystem.Infrastructure.Services.Interfaces;
 using RetailSystem.Shared.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RetailSystem.API.Controllers
 {
@@ -21,6 +22,7 @@ namespace RetailSystem.API.Controllers
 
         // GET: api/products
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var result = await _productService.GetAllProductAsync();
@@ -50,12 +52,27 @@ namespace RetailSystem.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAsync(int id,UpdateProductDTO model)
         {
-            Console.WriteLine($"Received Update Request for Product ID: {model.Id} ================================================");
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var result = await _productService.UpdateAsync(model);
             if (!result.IsSuccess) return BadRequest(result.Message);
             return Ok(result.Data);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _productService.DeleteAsync(id);
+
+            if (!result.IsSuccess)
+            {
+                return NotFound(result.Message); // 404
+            }
+
+            return Ok(new
+            {
+                id = id
+            });
         }
     }
 }
