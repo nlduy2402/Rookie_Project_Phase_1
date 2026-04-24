@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RetailSystem.Domain.Entities;
 using RetailSystem.Infrastructure.Services.Interfaces;
 using System.Security.Claims;
 
@@ -20,6 +21,7 @@ namespace RetailSystem.CustomerSite.Controllers
             return User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         }
 
+
         public async Task<IActionResult> Index()
         {
             var cart = await _cartService.GetCartAsync(GetUserId());
@@ -30,34 +32,10 @@ namespace RetailSystem.CustomerSite.Controllers
         public async Task<IActionResult> GetCartJson()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var cart = await _cartService.GetCartAsync(userId);
 
-            List<object> items;
+            var result = await _cartService.GetCartDtoAsync(userId);
 
-            if (cart == null)
-            {
-                items = new List<object>();
-            }
-            else
-            {
-                items = cart.Items.Select(i => new
-                {
-                    id = i.ProductId,
-                    name = i.Product?.Name,
-                    price = i.Product?.Price ?? 0,
-                    quantity = i.Quantity,
-                    image = i.Product?.Images != null && i.Product.Images.Any()
-                        ? i.Product.Images.First().Url.ToString()
-                        : "/images/no-image.png"
-                }).Cast<object>().ToList();
-            }
-
-            return Json(new
-            {
-                count = cart?.Items.Sum(i => i.Quantity) ?? 0,
-                items = items,
-                total = cart?.Items.Sum(i => i.Quantity * (i.Product?.Price ?? 0)) ?? 0
-            });
+            return Json(result);
         }
 
 
@@ -65,26 +43,13 @@ namespace RetailSystem.CustomerSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(int productId, int quantity = 1)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
 
             await _cartService.AddToCartAsync(userId, productId, quantity);
 
-            var cart = await _cartService.GetCartAsync(userId);
-
-            return Json(new
-            {
-                count = cart.Items.Sum(i => i.Quantity),
-                items = cart.Items.Select(i => new
-                {
-                    id = i.ProductId,
-                    name = i.Product.Name,
-                    price = i.Product.Price,
-                    quantity = i.Quantity,
-                    image = i.Product.Images.FirstOrDefault()
-                }),
-                total = cart.Items.Sum(i => i.Quantity * i.Product.Price)
-            });
+            return Json(await _cartService.GetCartDtoAsync(userId));
         }
+
         [HttpPost]
         public async Task<IActionResult> AddAjax(int productId, int quantity = 1)
         {
@@ -94,21 +59,7 @@ namespace RetailSystem.CustomerSite.Controllers
 
             var cart = await _cartService.GetCartAsync(userId);
 
-            return Json(new
-            {
-                count = cart.Items.Sum(i => i.Quantity),
-                items = cart.Items.Select(i => new
-                {
-                    id = i.ProductId,
-                    name = i.Product.Name,
-                    price = i.Product.Price,
-                    quantity = i.Quantity,
-                    image = i.Product?.Images != null && i.Product.Images.Any()
-                ? i.Product.Images.First().Url
-                : "/images/no-image.png"
-                }),
-                total = cart.Items.Sum(i => i.Quantity * i.Product.Price)
-            });
+            return Json(await _cartService.GetCartDtoAsync(userId));
         }
 
 
@@ -120,23 +71,7 @@ namespace RetailSystem.CustomerSite.Controllers
 
             await _cartService.RemoveItemAsync(userId, productId);
 
-            var cart = await _cartService.GetCartAsync(userId);
-
-            return Json(new
-            {
-                count = cart?.Items.Sum(i => i.Quantity) ?? 0,
-                items = cart?.Items.Select(i => new
-                {
-                    id = i.ProductId,
-                    name = i.Product?.Name,
-                    price = i.Product?.Price ?? 0,
-                    quantity = i.Quantity,
-                    image = i.Product?.Images != null && i.Product.Images.Any()
-                        ? i.Product.Images.First().Url
-                        : "/images/no-image.png"
-                }),
-                total = cart?.Items.Sum(i => i.Quantity * (i.Product?.Price ?? 0)) ?? 0
-            });
+            return Json(await _cartService.GetCartDtoAsync(userId));
         }
 
         //update item quantity in cart
@@ -154,23 +89,7 @@ namespace RetailSystem.CustomerSite.Controllers
                 await _cartService.UpdateQuantityAsync(userId, productId, quantity);
             }
 
-            var cart = await _cartService.GetCartAsync(userId);
-
-            return Json(new
-            {
-                count = cart?.Items.Sum(i => i.Quantity) ?? 0,
-                items = cart?.Items.Select(i => new
-                {
-                    id = i.ProductId,
-                    name = i.Product?.Name,
-                    price = i.Product?.Price ?? 0,
-                    quantity = i.Quantity,
-                    image = i.Product?.Images != null && i.Product.Images.Any()
-                        ? i.Product.Images.First().Url
-                        : "/images/no-image.png"
-                }),
-                total = cart?.Items.Sum(i => i.Quantity * (i.Product?.Price ?? 0)) ?? 0
-            });
+            return Json(await _cartService.GetCartDtoAsync(userId));
         }
 
 

@@ -15,5 +15,6 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
         Task RemoveItemAsync(string userId, int productId);
         Task UpdateQuantityAsync(string userId, int productId, int quantity);
         Task ClearCartAsync(string userId);
+        Task<CartDTO> GetCartDtoAsync(string userId);
     }
 }

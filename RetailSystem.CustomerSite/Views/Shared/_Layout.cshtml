@@ -209,7 +209,7 @@
                                     <div class="shopping-item" style="width: 400px;max-width: 90vw;">
                                         <div class="dropdown-cart-header">
                                             <span></span>
-                                            <a href="cart.html">View Cart</a>
+                                            <a asp-action="Index" asp-controller="Cart">@User.Identity.Name's Cart</a>
                                         </div>
                                         <ul class="shopping-list">
 @*                                             <li>
@@ -252,7 +252,7 @@
                                                 <span class="total-amount">0</span>
                                             </div>
                                             <div class="button">
-                                                <a href="checkout.html" class="btn animate">Checkout</a>
+                                                <a asp-action="Index" asp-controller="Cart" class="btn animate">Checkout</a>
                                             </div>
                                         </div>
                                     </div>

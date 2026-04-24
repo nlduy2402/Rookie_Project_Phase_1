@@ -106,5 +106,31 @@ namespace RetailSystem.Infrastructure.Services
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<CartDTO> GetCartDtoAsync(string userId)
+        {
+            var cart = await GetCartAsync(userId);
+
+            if (cart == null)
+                return new CartDTO();
+
+            return new CartDTO
+            {
+                Count = cart.Items.Sum(i => i.Quantity),
+
+                Items = cart.Items.Select(i => new CartItemDTO
+                {
+                    Id = i.ProductId,
+                    Name = i.Product?.Name,
+                    Price = i.Product?.Price ?? 0,
+                    Quantity = i.Quantity,
+                    Image = i.Product?.Images != null && i.Product.Images.Any()
+                        ? i.Product.Images.First().Url
+                        : "/images/no-image.png"
+                }).ToList(),
+
+                Total = cart.Items.Sum(i => i.Quantity * (i.Product?.Price ?? 0))
+            };
+        }
     }
 }
