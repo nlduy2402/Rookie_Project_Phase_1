@@ -15,6 +15,8 @@ namespace RetailSystem.Infrastructure.Persistence
         public DbSet<Category> Categories { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<AdminAccount> AdminAccounts { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,6 +52,18 @@ namespace RetailSystem.Infrastructure.Persistence
                     Role = "Admin"
                 }
             );
+            // cart has many items
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.Cart)
+                .WithMany(c => c.Items)
+                .HasForeignKey(ci => ci.CartId);
+
+            // can not delete product if it is in cart
+            modelBuilder.Entity<CartItem>()
+            .HasOne(ci => ci.Product)
+            .WithMany()
+            .HasForeignKey(ci => ci.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
