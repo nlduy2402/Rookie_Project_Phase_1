@@ -11,13 +11,15 @@ namespace RetailSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController : ControllerBase
+    public class ProductsController : BaseController
     {
         private readonly IProductService _productService;
+        private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService productService, ILogger<ProductsController> logger)
         {
             _productService = productService;
+            _logger = logger;
         }
 
         // GET: api/products
@@ -27,7 +29,7 @@ namespace RetailSystem.API.Controllers
         {
             var result = await _productService.GetAllProductAsync();
             if (!result.IsSuccess) return BadRequest(result.Message);
-            return Ok(result.Data);
+            return OkResponse(result.Data);
         }
 
         // GET: api/products/{id}
@@ -35,7 +37,7 @@ namespace RetailSystem.API.Controllers
         public async Task<IActionResult> GetByIdAsync(int id)
         {
 
-            return Ok(await _productService.GetByIdAsync(id));
+            return OkResponse(await _productService.GetByIdAsync(id));
         }
 
         // POST api/products
@@ -46,7 +48,7 @@ namespace RetailSystem.API.Controllers
                 return BadRequest(ModelState);
             var result = await _productService.CreateAsync(model);
             if(!result.IsSuccess) return BadRequest(result.Message);
-            return Ok(result.Data);
+            return OkResponse(result.Data);
         }
 
         [HttpPut("{id}")]
@@ -56,7 +58,7 @@ namespace RetailSystem.API.Controllers
                 return BadRequest(ModelState);
             var result = await _productService.UpdateAsync(model);
             if (!result.IsSuccess) return BadRequest(result.Message);
-            return Ok(result.Data);
+            return OkResponse(result.Data);
         }
 
         [HttpDelete("{id}")]
@@ -69,10 +71,8 @@ namespace RetailSystem.API.Controllers
                 return NotFound(result.Message); // 404
             }
 
-            return Ok(new
-            {
-                id = id
-            });
+            return OkResponse(id);
+
         }
     }
 }

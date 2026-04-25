@@ -19,7 +19,7 @@ namespace RetailSystem.Infrastructure.Services
 
         }
 
-        public async Task<Category> CreateAsync(CreateCategoryDTO model)
+        public async Task<ServiceResult<Category>> CreateAsync(CreateCategoryDTO model)
         {
             if (string.IsNullOrWhiteSpace(model.Name))
             {
@@ -32,14 +32,14 @@ namespace RetailSystem.Infrastructure.Services
             };
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
-            return category;
+            return new ServiceResult<Category> { Data = category, IsSuccess = true, Message="Category Created !"};
         }
         public async new Task<ServiceResult<Category>> GetByIdAsync(int id)
         {
             var category = await _dbSet.FindAsync(id);
             if (category == null)
             {
-                return new ServiceResult<Category> { IsSuccess = false, Message = "Data not found" };
+                return new ServiceResult<Category> { IsSuccess = false, Message = "Dont't have any category match input" };
             }
             return new ServiceResult<Category> { IsSuccess = true, Data = category };
         }
@@ -52,7 +52,7 @@ namespace RetailSystem.Infrastructure.Services
                 return new ServiceResult<Category>
                 {
                     IsSuccess = false,
-                    Message = "Data not found"
+                    Message = "Error occured while updating Category"
                 };
             }
 
@@ -66,7 +66,8 @@ namespace RetailSystem.Infrastructure.Services
             return new ServiceResult<Category>
             {
                 IsSuccess = true,
-                Data = category
+                Data = category,
+                Message = "Category Updated !"
             };
         }
 

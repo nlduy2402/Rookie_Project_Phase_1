@@ -10,7 +10,7 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
 {
     public interface ICategoryService : IBaseService<Category>
     {
-        Task<Category> CreateAsync(CreateCategoryDTO model);
+        Task<ServiceResult<Category>> CreateAsync(CreateCategoryDTO model);
         Task<ServiceResult<Category>> UpdateAsync(int id, UpdateCategoryDTO model);
         new Task<ServiceResult<Category>> GetByIdAsync(int id);
     }

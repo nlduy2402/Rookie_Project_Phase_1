@@ -9,23 +9,36 @@ namespace RetailSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController : ControllerBase
+    public class CategoriesController : BaseController
     {
         private readonly ICategoryService _categoryService;
-        public CategoriesController(ICategoryService categoryService) {
+        private readonly ILogger<CategoriesController> _logger;
+
+        public CategoriesController(ICategoryService categoryService, ILogger<CategoriesController> logger)
+        {
             _categoryService = categoryService;
+            _logger = logger;
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _categoryService.GetAllAsync());
+            try {
+                var result = await _categoryService.GetAllAsync();
+                return OkResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting all categories.");
+                return StatusCode(500, "Internal server error");
+            }
+            throw new Exception("Bad Request");
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id) {
             var result = await _categoryService.GetByIdAsync(id);
             if (!result.IsSuccess) return NotFound(result.Message);
 
-            return Ok(result.Data);
+            return OkResponse(result.Data,result.Message);
         }
         [HttpPost]
         public async Task<IActionResult> Create(CreateCategoryDTO model)
@@ -33,9 +46,10 @@ namespace RetailSystem.API.Controllers
             try
             {
                 var result = await _categoryService.CreateAsync(model);
-                return Ok(result);
+                return OkResponse(result.Data, result.Message);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
             }
             throw new Exception("Bad Request");
         }
@@ -47,7 +61,7 @@ namespace RetailSystem.API.Controllers
             {
                 var result = await _categoryService.UpdateAsync(id,model);
                 if (!result.IsSuccess) return NotFound(result.Message);
-                return Ok(result.Data);
+                return OkResponse(result.Data,result.Message);
             }
             catch (Exception ex)
             {

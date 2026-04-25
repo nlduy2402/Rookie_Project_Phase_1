@@ -77,7 +77,7 @@ namespace RetailSystem.CustomerSite.Controllers
             if (result.Succeeded)
                 return RedirectToAction("Index", "Home");
 
-            ModelState.AddModelError("", "Sai tài khoản hoặc mật khẩu");
+            ModelState.AddModelError("", "Invalid Username or Password");
             return View(model);
         }
 
