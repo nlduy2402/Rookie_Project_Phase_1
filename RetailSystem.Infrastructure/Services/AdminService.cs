@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RetailSystem.Domain.Entities;
@@ -21,7 +22,7 @@ namespace RetailSystem.Infrastructure.Services
         private readonly IConfiguration _config;
 
 
-        public AdminService(AppDbContext context, IConfiguration config) : base(context)
+        public AdminService(AppDbContext context,IMemoryCache cache, IConfiguration config) : base(context,cache)
         {
             _config = config;
         }

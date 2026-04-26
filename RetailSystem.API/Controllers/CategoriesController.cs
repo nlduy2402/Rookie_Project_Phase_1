@@ -22,19 +22,15 @@ namespace RetailSystem.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try {
-                var result = await _categoryService.GetAllAsync();
-                return OkResponse(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while getting all categories.");
-                return StatusCode(500, "Internal server error");
-            }
-            throw new Exception("Bad Request");
+            var result = await _categoryService.GetAllAsync();
+            if (!result.IsSuccess) return BadRequest(result.Message);
+            return OkResponse(result.Data);
+
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id) {
+            if(id <= 0) return BadRequest("Invalid input !");
+
             var result = await _categoryService.GetByIdAsync(id);
             if (!result.IsSuccess) return NotFound(result.Message);
 
@@ -43,39 +39,29 @@ namespace RetailSystem.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateCategoryDTO model)
         {
-            try
-            {
-                var result = await _categoryService.CreateAsync(model);
-                return OkResponse(result.Data, result.Message);
-            }
-            catch (Exception ex)
-            {
-            }
-            throw new Exception("Bad Request");
+            if (model == null) return BadRequest("Invalid input !");
+            var result = await _categoryService.CreateAsync(model);
+            if (!result.IsSuccess) return BadRequest(result.Message);
+            return OkResponse(result.Data, result.Message);
+
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UpdateCategoryDTO model)
         {
-            try
-            {
-                var result = await _categoryService.UpdateAsync(id,model);
-                if (!result.IsSuccess) return NotFound(result.Message);
-                return OkResponse(result.Data,result.Message);
-            }
-            catch (Exception ex)
-            {
-            }
-            throw new Exception("Bad Request");
+            if(id <= 0 || model==null) return BadRequest("Invalid input !");
+
+            var result = await _categoryService.UpdateAsync(id,model);
+            if (!result.IsSuccess) return NotFound(result.Message);
+            return OkResponse(result.Data,result.Message);
+
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            if (id <= 0)
-            {
-                return BadRequest("Invalid input !");
-            }
+            if (id <= 0) return BadRequest("Invalid input !");
+            
             try
             {
                 var result = await _categoryService.DeleteAsync(id);

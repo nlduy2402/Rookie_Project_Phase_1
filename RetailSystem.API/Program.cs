@@ -10,6 +10,7 @@ using System.Text;
 using Microsoft.AspNetCore.Diagnostics;
 using Serilog;
 using Serilog.Events;
+using RetailSystem.API.Shared;
 
 // Use Serilog for logging
 Log.Logger = new LoggerConfiguration()
@@ -62,12 +63,12 @@ try
     });
 
     builder.Services.AddAuthorization();
-
-
+    builder.Services.AddMemoryCache();
 
     builder.Services.AddScoped<ICategoryService, CategoryService>();
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<IAdminService, AdminService>();
+
 
     builder.Services.AddCors(options => {
         options.AddPolicy("AllowAll", builder => builder.WithOrigins("https://localhost:5173").AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
@@ -82,10 +83,13 @@ try
 
     var app = builder.Build();
 
+    //Global exception handling
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
+
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
-        app.UseDeveloperExceptionPage(); 
+        //app.UseDeveloperExceptionPage(); 
     }
     else
     {

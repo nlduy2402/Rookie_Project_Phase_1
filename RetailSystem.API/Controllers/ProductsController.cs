@@ -24,7 +24,6 @@ namespace RetailSystem.API.Controllers
 
         // GET: api/products
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var result = await _productService.GetAllProductAsync();
@@ -36,8 +35,9 @@ namespace RetailSystem.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-
-            return OkResponse(await _productService.GetByIdAsync(id));
+            var result = await _productService.GetProductByIdAsync(id);
+            if (!result.IsSuccess) return BadRequest(result.Message);
+            return OkResponse(result.Data);
         }
 
         // POST api/products
@@ -48,7 +48,7 @@ namespace RetailSystem.API.Controllers
                 return BadRequest(ModelState);
             var result = await _productService.CreateAsync(model);
             if(!result.IsSuccess) return BadRequest(result.Message);
-            return OkResponse(result.Data);
+            return OkResponse(result.Data, result.Message);
         }
 
         [HttpPut("{id}")]
@@ -58,7 +58,7 @@ namespace RetailSystem.API.Controllers
                 return BadRequest(ModelState);
             var result = await _productService.UpdateAsync(model);
             if (!result.IsSuccess) return BadRequest(result.Message);
-            return OkResponse(result.Data);
+            return OkResponse(result.Data,result.Message);
         }
 
         [HttpDelete("{id}")]
@@ -71,7 +71,7 @@ namespace RetailSystem.API.Controllers
                 return NotFound(result.Message); // 404
             }
 
-            return OkResponse(id);
+            return OkResponse(id,result.Message);
 
         }
     }

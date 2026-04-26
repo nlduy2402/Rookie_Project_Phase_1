@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using RetailSystem.Domain.Entities;
 using RetailSystem.Infrastructure.Persistence;
 using RetailSystem.Infrastructure.Services.Base;
@@ -14,7 +15,7 @@ namespace RetailSystem.Infrastructure.Services
 {
     public class CartService : BaseService<Cart>,ICartService
     {
-        public CartService(AppDbContext context) : base(context)
+        public CartService(AppDbContext context, IMemoryCache cache) : base(context, cache)
         {
 
         }

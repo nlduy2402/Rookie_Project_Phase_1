@@ -10,13 +10,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RetailSystem.Shared.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace RetailSystem.Infrastructure.Services
 {
     public class ProductService : BaseService<Product>, IProductService
     {
-        public ProductService(AppDbContext context) : base(context)
+        private readonly ILogger<ProductService> _logger;
+        public ProductService(AppDbContext context, ILogger<ProductService> logger, IMemoryCache cache) : base(context, cache)
         {
+            _logger = logger;
         }
 
         // override nếu cần include
@@ -30,7 +34,7 @@ namespace RetailSystem.Infrastructure.Services
                 return new ServiceResult<List<Product>>()
                 {
                     IsSuccess = false,
-                    Message = "Wrong"
+                    Message = "Error Occured While Get All Products."
                 };
             }
             return new ServiceResult<List<Product>>()
@@ -47,7 +51,7 @@ namespace RetailSystem.Infrastructure.Services
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (product == null) {
-                return new ServiceResult<Product> { IsSuccess = false, Message = "Product not exist !" };
+                return new ServiceResult<Product> { IsSuccess = false, Message = "Product Not Exist" };
             }
             return new ServiceResult<Product>()
             {
@@ -61,7 +65,7 @@ namespace RetailSystem.Infrastructure.Services
             var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == model.Id);
             if (product == null)
             {
-                return new ServiceResult<Product>() { IsSuccess = false, Message = "Data not found!" };
+                return new ServiceResult<Product>() { IsSuccess = false, Message = "Product Not Exist" };
 
             }
             product?.UpdateFromDto(model);
@@ -80,7 +84,7 @@ namespace RetailSystem.Infrastructure.Services
                 .FirstOrDefaultAsync(c => c.Id == model.CategoryId);
 
             if (category == null)
-                return new ServiceResult<Product>() { IsSuccess = false, Message = "Data not found!" };
+                return new ServiceResult<Product>() { IsSuccess = false, Message = "Data Not Found" };
             
             var product = new Product
             {
@@ -100,7 +104,7 @@ namespace RetailSystem.Infrastructure.Services
             };
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            return new ServiceResult<Product>() { IsSuccess = true, Message = "Product Created!", Data=product };
+            return new ServiceResult<Product>() { IsSuccess = true, Message = "Product Created", Data=product };
         }
 
         public async Task<ServiceResult<List<Product>>> GetByCategory(int id)
@@ -115,7 +119,7 @@ namespace RetailSystem.Infrastructure.Services
                 return new ServiceResult<List<Product>>()
                 {
                     IsSuccess = true,
-                    Message = "No product found in this category!"
+                    Message = "No Product Found in This Category!"
                 };
             }
             return new ServiceResult<List<Product>>()
@@ -133,7 +137,7 @@ namespace RetailSystem.Infrastructure.Services
                 return new ServiceResult<bool>
                 {
                     IsSuccess = false,
-                    Message = "Product not found"
+                    Message = "Product Not Found"
                 };
             }
 
@@ -142,7 +146,8 @@ namespace RetailSystem.Infrastructure.Services
 
             return new ServiceResult<bool>
             {
-                IsSuccess = true
+                IsSuccess = true,
+                Message = "Product Deleted Successfully"
             };
         }
     }
