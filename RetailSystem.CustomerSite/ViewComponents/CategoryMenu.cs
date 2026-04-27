@@ -16,7 +16,7 @@ namespace RetailSystem.CustomerSite.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var categories = await _categoryService.GetAllAsync();
-            return View(categories);
+            return View(categories.Data);
         }
     }
 }

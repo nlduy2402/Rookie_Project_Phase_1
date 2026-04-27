@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace RetailSystem.Domain.Entities
 {
-    public class ProductImage
-    {
+    public class ProductImage : TEntity
+    { 
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         [Required]

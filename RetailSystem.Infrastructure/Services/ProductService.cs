@@ -12,80 +12,86 @@ using System.Threading.Tasks;
 using RetailSystem.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Memory;
+using RetailSystem.Infrastructure.Repository.Interface;
+using Microsoft.Identity.Client;
 
 namespace RetailSystem.Infrastructure.Services
 {
     public class ProductService : BaseService<Product>, IProductService
     {
         private readonly ILogger<ProductService> _logger;
-        public ProductService(AppDbContext context, ILogger<ProductService> logger, IMemoryCache cache) : base(context, cache)
+        private readonly IUnitOfWork _uow;
+        private const string ProductCacheKey = "AllProducts";
+        private readonly MemoryCacheEntryOptions _cacheOptions;
+        public ProductService(AppDbContext context, ILogger<ProductService> logger, IMemoryCache cache,IUnitOfWork uow) : base(context, cache)
         {
             _logger = logger;
+            _uow = uow;
+            _cacheOptions = new MemoryCacheEntryOptions()
+            .SetSlidingExpiration(TimeSpan.FromMinutes(5))
+            .SetAbsoluteExpiration(TimeSpan.FromHours(1));
         }
 
-        // override nếu cần include
         public async Task<ServiceResult<List<Product>>> GetAllProductAsync()
         {
-            var result = await _context.Products
-                            .Include(p => p.Images)
-                            .Include(p => p.Category)
-                            .ToListAsync();
-            if (result == null) {
-                return new ServiceResult<List<Product>>()
-                {
-                    IsSuccess = false,
-                    Message = "Error Occured While Get All Products."
-                };
-            }
-            return new ServiceResult<List<Product>>()
+            if (!_cache.TryGetValue(ProductCacheKey, out List<Product>? products))
             {
-                IsSuccess = true,
-                Data = result
-            };
+                var resultFromDb = await _uow.Products.GetAllAsync(includeProperties: "Images,Category");
+                products = resultFromDb.ToList();
+
+                _cache.Set(ProductCacheKey, products, _cacheOptions);
+            }
+
+            return new ServiceResult<List<Product>> { IsSuccess = true, Data = products };
         }
 
         public async Task<ServiceResult<Product>> GetProductByIdAsync(int id)
         {
-            var product =  await _context.Products
-                .Include(p => p.Images)
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(p => p.Id == id);
-            if (product == null) {
-                return new ServiceResult<Product> { IsSuccess = false, Message = "Product Not Exist" };
-            }
-            return new ServiceResult<Product>()
-            {
-                IsSuccess = true,
-                Data = product
-            };
-        }
+            var product = await _uow.Products.GetFirstOrDefaultAsync(p => p.Id == id, "Images,Category");
 
-        public async Task<ServiceResult<Product>> UpdateAsync(UpdateProductDTO model)
+            if (product == null) return new ServiceResult<Product> { IsSuccess = false, Message = "Product Not Exist" };
+
+            return new ServiceResult<Product> { IsSuccess = true, Data = product };
+        }
+        public async Task<ServiceResult<List<Product>>> GetByCategory(int id)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == model.Id);
-            if (product == null)
-            {
-                return new ServiceResult<Product>() { IsSuccess = false, Message = "Product Not Exist" };
+            string _cacheKey = $"Products_Category_{id}";
 
+            if (!_cache.TryGetValue(_cacheKey, out List<Product>? products))
+            {
+                _logger.LogInformation($"Cache miss for category {id}. Fetching from database...");
+
+                // Gọi Repo thông qua UoW với filter và include
+                var resultFromDb = await _uow.Products.GetAllAsync(
+                    filter: p => p.CategoryId == id,
+                    includeProperties: "Images,Category"
+                );
+
+                products = resultFromDb.ToList();
+
+                if (products == null) products = new List<Product>();
+
+                _cache.Set(_cacheKey, products, _cacheOptions);
             }
-            product?.UpdateFromDto(model);
-            await _context.SaveChangesAsync();
-            return new ServiceResult<Product>()
-            {
-                IsSuccess = true,
-                Data = product
-            };
-        }
 
+            if (!products.Any())
+            {
+                return new ServiceResult<List<Product>>
+                {
+                    IsSuccess = true,
+                    Message = "No Product Found in This Category!",
+                    Data = products
+                };
+            }
+
+            return new ServiceResult<List<Product>> { IsSuccess = true, Data = products };
+        }
 
         public async Task<ServiceResult<Product>> CreateAsync(CreateProductDTO model)
         {
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == model.CategoryId);
+            var category = await _uow.Categories.GetByIdAsync(model.CategoryId);
+            if (category == null) return new ServiceResult<Product> { IsSuccess = false, Message = "Category Not Found" };
 
-            if (category == null)
-                return new ServiceResult<Product>() { IsSuccess = false, Message = "Data Not Found" };
-            
             var product = new Product
             {
                 Name = model.Name,
@@ -102,53 +108,40 @@ namespace RetailSystem.Infrastructure.Services
                     Url = url
                 }).ToList()
             };
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-            return new ServiceResult<Product>() { IsSuccess = true, Message = "Product Created", Data=product };
+
+            await _uow.Products.CreateAsync(product);
+            await _uow.SaveChangesAsync();
+
+            _cache.Remove(ProductCacheKey);
+
+            return new ServiceResult<Product> { IsSuccess = true, Data = product };
         }
 
-        public async Task<ServiceResult<List<Product>>> GetByCategory(int id)
+        public async Task<ServiceResult<Product>> UpdateAsync(UpdateProductDTO model)
         {
-            var products = await _context.Products
-                        .Where(p => p.CategoryId == id)
-                        .Include(p => p.Images)
-                        .Include(p => p.Category)
-                        .ToListAsync();
-            if (products == null || products.Count == 0)
-            {
-                return new ServiceResult<List<Product>>()
-                {
-                    IsSuccess = true,
-                    Message = "No Product Found in This Category!"
-                };
-            }
-            return new ServiceResult<List<Product>>()
-            {
-                IsSuccess = true,
-                Data = products
-            };
+            var product = await _uow.Products.GetByIdAsync(model.Id);
+            if (product == null) return new ServiceResult<Product> { IsSuccess = false, Message = "Not Exist" };
+
+            product.UpdateFromDto(model);
+            _uow.Products.Update(product);
+            await _uow.SaveChangesAsync();
+
+            _cache.Remove(ProductCacheKey);
+
+            return new ServiceResult<Product> { IsSuccess = true, Data = product };
         }
-        public async new Task<ServiceResult<bool>> DeleteAsync(int id)
+
+        public async Task<ServiceResult<bool>> DeleteAsync(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _uow.Products.GetByIdAsync(id);
+            if (product == null) return new ServiceResult<bool> { IsSuccess = false };
 
-            if (product == null)
-            {
-                return new ServiceResult<bool>
-                {
-                    IsSuccess = false,
-                    Message = "Product Not Found"
-                };
-            }
+            _uow.Products.Delete(product);
+            await _uow.SaveChangesAsync();
 
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            _cache.Remove(ProductCacheKey);
 
-            return new ServiceResult<bool>
-            {
-                IsSuccess = true,
-                Message = "Product Deleted Successfully"
-            };
+            return new ServiceResult<bool> { IsSuccess = true };
         }
     }
 }

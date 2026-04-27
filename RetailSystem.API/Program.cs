@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Diagnostics;
 using Serilog;
 using Serilog.Events;
 using RetailSystem.API.Shared;
+using RetailSystem.Infrastructure.Repository.Interface;
+using RetailSystem.Infrastructure.Repository;
 
 // Use Serilog for logging
 Log.Logger = new LoggerConfiguration()
@@ -65,6 +67,8 @@ try
     builder.Services.AddAuthorization();
     builder.Services.AddMemoryCache();
 
+
+    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
     builder.Services.AddScoped<ICategoryService, CategoryService>();
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<IAdminService, AdminService>();

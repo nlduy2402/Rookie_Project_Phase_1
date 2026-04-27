@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using RetailSystem.Domain.Entities;
 using RetailSystem.Shared;
 using RetailSystem.Infrastructure.Seed;
+using RetailSystem.Infrastructure.Repository.Interface;
+using RetailSystem.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.Configure<JwtSetting>(
     builder.Configuration.GetSection("Jwt"));
 
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProductService,ProductService>();
 builder.Services.AddScoped<ICategoryService,CategoryService>();
 builder.Services.AddScoped<IAdminService, AdminService>();

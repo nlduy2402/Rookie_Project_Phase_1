@@ -5,6 +5,7 @@ using RetailSystem.Domain.Entities;
 using RetailSystem.Infrastructure.Persistence;
 using RetailSystem.Infrastructure.Services.Interfaces;
 using RetailSystem.Shared.Extensions;
+using RetailSystem.Shared.ViewModels;
 namespace RetailSystem.CustomerSite.Controllers
 {
     public class HomeController : Controller
@@ -60,7 +61,7 @@ namespace RetailSystem.CustomerSite.Controllers
             var result = await _productService.GetAllProductAsync();
             if (!result.IsSuccess) return BadRequest(result.Message);
 
-            var vm = result?.Data?.Select(p => p.ToCardVM()).ToList();
+            var vm = result?.Data?.Select(p => p.ToCardVM()).ToList() ?? new List<ProductViewModel>();
 
             return View(vm);
         }

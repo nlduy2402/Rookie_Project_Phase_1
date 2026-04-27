@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RetailSystem.Domain.Entities
 {
-    public class Category
+    public class Category : TEntity
     {
         [Key]
         public int Id { get; set; }

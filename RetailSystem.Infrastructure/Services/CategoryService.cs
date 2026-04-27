@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using RetailSystem.Infrastructure.Repository.Interface;
 
 namespace RetailSystem.Infrastructure.Services
 {
@@ -19,10 +20,12 @@ namespace RetailSystem.Infrastructure.Services
     {
         private readonly ILogger<CategoryService> _logger;
         private readonly IMemoryCache _cache;
-        public CategoryService(AppDbContext context,ILogger<CategoryService> logger, IMemoryCache cache) : base(context, cache)
+        private readonly IUnitOfWork _uow;
+        public CategoryService(AppDbContext context,ILogger<CategoryService> logger, IMemoryCache cache, IUnitOfWork uow) : base(context, cache)
         {
             _logger = logger;
             _cache = cache;
+            _uow = uow;
         }
 
         public async new Task<ServiceResult<List<Category>>> GetAllAsync()
@@ -31,7 +34,8 @@ namespace RetailSystem.Infrastructure.Services
             if (!_cache.TryGetValue(_cacheKey, out List<Category>? categories))
             {
 
-                categories = await _context.Categories.ToListAsync();
+                var result = await _uow.Categories.GetAllAsync();
+                categories = result.ToList();
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(TimeSpan.FromMinutes(5)) 
                 .SetAbsoluteExpiration(TimeSpan.FromHours(1));
@@ -57,8 +61,8 @@ namespace RetailSystem.Infrastructure.Services
                 Name = model.Name,
                 Description = model.Description,
             };
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
+            await _uow.Categories.CreateAsync(category);
+            await _uow.SaveChangesAsync();
 
             _cache.Remove("AllCategories");
             return new ServiceResult<Category> { Data = category, IsSuccess = true, Message="Category Created !"};
@@ -68,7 +72,7 @@ namespace RetailSystem.Infrastructure.Services
             string cacheKey = $"Category_{id}";
             if (!_cache.TryGetValue(cacheKey, out Category? category))
             {
-                category = await _dbSet.FindAsync(id);
+                category = await _uow.Categories.GetByIdAsync(id);
                 if (category == null)
                 {
                     return new ServiceResult<Category> { IsSuccess = false, Message = "Dont't Have Any Category Match Input" };
@@ -98,7 +102,8 @@ namespace RetailSystem.Infrastructure.Services
             category.Name = model.Name;
             category.Description = model.Description;
 
-            await _context.SaveChangesAsync();
+            _uow.Categories.Update(category);
+            await _uow.SaveChangesAsync();
 
             _cache.Remove("AllCategories");
             _cache.Remove($"Category_{id}");

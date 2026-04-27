@@ -4,7 +4,7 @@ using RetailSystem.Domain.Enums;
 
 namespace RetailSystem.Domain.Entities
 {
-    public class Product
+    public class Product : TEntity
     {
         [Key]
         public int Id { get; set; }
