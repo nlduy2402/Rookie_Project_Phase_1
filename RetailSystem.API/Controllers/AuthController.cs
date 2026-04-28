@@ -40,7 +40,19 @@ namespace RetailSystem.API.Controllers
             });
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(LoginDTO model)
+        {
+            var result = await _adminService.RegisterAsync(model);
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
+            return Ok(new
+            {
+                message = result.Message,
+                admin = result.Data
+            });
 
 
+        }
     }
 }

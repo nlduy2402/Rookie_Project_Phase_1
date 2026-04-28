@@ -5,10 +5,10 @@ using RetailSystem.Infrastructure.Services;
 using RetailSystem.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using RetailSystem.Domain.Entities;
-using RetailSystem.Shared;
 using RetailSystem.Infrastructure.Seed;
 using RetailSystem.Infrastructure.Repository.Interface;
 using RetailSystem.Infrastructure.Repository;
+using RetailSystem.Shared.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RetailSystem.Shared
+namespace RetailSystem.Shared.Settings
 {
     public class JwtSetting
     {
