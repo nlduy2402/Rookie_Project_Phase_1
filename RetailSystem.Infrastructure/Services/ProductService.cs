@@ -14,16 +14,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Memory;
 using RetailSystem.Infrastructure.Repository.Interface;
 using Microsoft.Identity.Client;
+using RetailSystem.Domain.Repository.Interface;
 
 namespace RetailSystem.Infrastructure.Services
 {
     public class ProductService : BaseService<Product>, IProductService
     {
         private readonly ILogger<ProductService> _logger;
-        private readonly IUnitOfWork _uow;
+        private readonly new IUnitOfWork _uow;
         private const string ProductCacheKey = "AllProducts";
         private readonly MemoryCacheEntryOptions _cacheOptions;
-        public ProductService(AppDbContext context, ILogger<ProductService> logger, IMemoryCache cache,IUnitOfWork uow) : base(context, cache)
+        public ProductService(ILogger<ProductService> logger, IMemoryCache cache,IUnitOfWork uow) : base(uow, cache)
         {
             _logger = logger;
             _uow = uow;
@@ -31,6 +32,7 @@ namespace RetailSystem.Infrastructure.Services
             .SetSlidingExpiration(TimeSpan.FromMinutes(5))
             .SetAbsoluteExpiration(TimeSpan.FromHours(1));
         }
+        protected override IBaseRepository<Product> GetRepository() => _uow.Products;
 
         public async Task<ServiceResult<List<Product>>> GetAllProductAsync()
         {

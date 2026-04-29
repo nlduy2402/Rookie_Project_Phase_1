@@ -10,6 +10,7 @@ using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using RetailSystem.Domain.Entities;
 using RetailSystem.Domain.Repository.Interface;
+using RetailSystem.Infrastructure.Services;
 
 namespace RetailSystem.Infrastructure.Repository
 {
@@ -18,12 +19,16 @@ namespace RetailSystem.Infrastructure.Repository
         private readonly AppDbContext _context;
         public IBaseRepository<Product> Products { get; private set; }
         public IBaseRepository<Category> Categories { get; private set; }
+        public IBaseRepository<AdminAccount> AdminAccounts { get; private set; }
+        public IBaseRepository<Cart> Carts { get; private set; }
 
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
             Products = new BaseRepository<Product>(_context);
             Categories = new BaseRepository<Category>(_context);
+            AdminAccounts = new BaseRepository<AdminAccount>(_context);
+            Carts = new BaseRepository<Cart>(_context);
         }
 
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();

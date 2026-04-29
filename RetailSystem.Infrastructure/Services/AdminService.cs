@@ -20,6 +20,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using RetailSystem.Shared.Helpers;
 using System.Reflection.Metadata;
+using RetailSystem.Infrastructure.Repository.Interface;
+using RetailSystem.Domain.Repository.Interface;
 
 
 namespace RetailSystem.Infrastructure.Services
@@ -27,12 +29,14 @@ namespace RetailSystem.Infrastructure.Services
     public class AdminService :  BaseService<AdminAccount>,IAdminService
     {
         private readonly IConfiguration _config;
+        private readonly new IUnitOfWork _uow;
 
-
-        public AdminService(AppDbContext context,IMemoryCache cache, IConfiguration config) : base(context,cache)
+        public AdminService(IMemoryCache cache, IConfiguration config, IUnitOfWork uow) : base(uow,cache)
         {
             _config = config;
+            _uow = uow;
         }
+        protected override IBaseRepository<AdminAccount> GetRepository() => _uow.AdminAccounts;
 
         public string GenerateToken(AdminAccount acc)
         {
@@ -77,8 +81,8 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<ServiceResult<AdminAccount>> RegisterAsync(LoginDTO request)
         {
-            var accountExists = await _context.AdminAccounts.AnyAsync(x => x.Username == request.Username);
-            if (accountExists)
+            var accountExists = await _uow.AdminAccounts.GetFirstOrDefaultAsync(p=>p.Username == request.Username);
+            if (accountExists != null)
             {
                 return new ServiceResult<AdminAccount>
                 {
@@ -98,9 +102,8 @@ namespace RetailSystem.Infrastructure.Services
             var refreshToken = GenerateRefreshToken();
             await SetRefreshToken(refreshToken, admin);
 
-
-            _context.AdminAccounts.Add(admin);
-            await _context.SaveChangesAsync();
+            await _uow.AdminAccounts.CreateAsync(admin);
+            await _uow.SaveChangesAsync();
             return new ServiceResult<AdminAccount>
             {
                 IsSuccess = true,
@@ -110,8 +113,7 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<ServiceResult<string>> LoginAsync(LoginDTO model)
         {
-            var admin = await _context.AdminAccounts
-                    .FirstOrDefaultAsync(x => x.Username == model.Username);
+            var admin = await _uow.AdminAccounts.GetFirstOrDefaultAsync(p => p.Username == model.Username);
 
             if (admin == null || 
                 !VerifyPasswordHash(model.Password, 
@@ -153,14 +155,14 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task SetRefreshToken(RefreshToken newRefreshToken, AdminAccount admin)
         {
-            var user = await _context.AdminAccounts.FindAsync(admin.Id);
+            var user = await _uow.AdminAccounts.GetByIdAsync(admin.Id);
             if (user == null) return;
 
             user.RefreshToken = newRefreshToken.Token;
             user.TokenCreated = newRefreshToken.Created;
             user.TokenExpires = newRefreshToken.Expires;
 
-            await _context.SaveChangesAsync();
+            await _uow.SaveChangesAsync();
         }
     }
 }

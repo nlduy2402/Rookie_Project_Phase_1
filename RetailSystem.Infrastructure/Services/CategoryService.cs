@@ -13,20 +13,22 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using RetailSystem.Infrastructure.Repository.Interface;
+using RetailSystem.Domain.Repository.Interface;
 
 namespace RetailSystem.Infrastructure.Services
 {
     public class CategoryService : BaseService<Category>, ICategoryService
     {
         private readonly ILogger<CategoryService> _logger;
-        private readonly IMemoryCache _cache;
-        private readonly IUnitOfWork _uow;
-        public CategoryService(AppDbContext context,ILogger<CategoryService> logger, IMemoryCache cache, IUnitOfWork uow) : base(context, cache)
+        private readonly new IMemoryCache _cache;
+        private readonly new IUnitOfWork _uow;
+        public CategoryService(ILogger<CategoryService> logger, IMemoryCache cache, IUnitOfWork uow) : base(uow, cache)
         {
             _logger = logger;
             _cache = cache;
             _uow = uow;
         }
+        protected override IBaseRepository<Category> GetRepository() => _uow.Categories;
 
         public async new Task<ServiceResult<List<Category>>> GetAllAsync()
         {

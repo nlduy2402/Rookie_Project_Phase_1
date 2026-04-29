@@ -11,6 +11,7 @@ namespace RetailSystem.Shared.DTOs
     {
         [Required]
         public int ProductId { get; set; }
+        [Required]
         public int Quantity { get; set; } = 1;
     }
 }
