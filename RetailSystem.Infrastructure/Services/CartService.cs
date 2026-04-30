@@ -26,12 +26,6 @@ namespace RetailSystem.Infrastructure.Services
         
         public async Task<Cart?> GetCartAsync(string userId)
         {
-            //return await _context.Carts
-            //    .Include(c => c.Items)
-            //    .ThenInclude(i => i.Product)
-            //    .ThenInclude(p => p.Images)
-            //    .FirstOrDefaultAsync(c => c.UserId == userId);
-
             var cart = await _uow.Carts.GetFirstOrDefaultAsync(
             predicate: c => c.UserId == userId,
             includeProperties: "Items.Product.Images");
@@ -47,15 +41,11 @@ namespace RetailSystem.Infrastructure.Services
             if (productExists == null)
                 throw new Exception("Product not found");
 
-            //var cart = await _context.Carts
-            //    .Include(c => c.Items)
-            //    .FirstOrDefaultAsync(c => c.UserId == userId);
             var cart = await _uow.Carts.GetFirstOrDefaultAsync(c => c.UserId == userId, "Items");
 
             if (cart == null)
             {
                 cart = new Cart { UserId = userId };
-                //_context.Carts.Add(cart);
                 await _uow.Carts.CreateAsync(cart);
             }
 
@@ -74,15 +64,11 @@ namespace RetailSystem.Infrastructure.Services
                 });
             }
 
-            //await _context.SaveChangesAsync();
             await _uow.SaveChangesAsync();
         }
 
         public async Task RemoveItemAsync(string userId, int productId)
         {
-            //var cart = await _context.Carts
-            //    .Include(c => c.Items)                                                                   
-            //    .FirstOrDefaultAsync(c => c.UserId == userId);
             var cart = await _uow.Carts.GetFirstOrDefaultAsync(c => c.UserId == userId, "Items");
 
             var item = cart?.Items.FirstOrDefault(i => i.ProductId == productId);
@@ -90,16 +76,11 @@ namespace RetailSystem.Infrastructure.Services
             if (item == null) return;
 
             cart?.Items.Remove(item);
-            //await _context.SaveChangesAsync();
             await _uow.SaveChangesAsync();
         }
 
         public async Task UpdateQuantityAsync(string userId, int productId, int quantity)
         {
-            //var cart = await _context.Carts
-            //    .Include(c => c.Items)
-            //    .FirstOrDefaultAsync(c => c.UserId == userId);
-
             var cart = await _uow.Carts.GetFirstOrDefaultAsync(c => c.UserId == userId, "Items");
 
             var item = cart?.Items.FirstOrDefault(i => i.ProductId == productId);
@@ -108,22 +89,17 @@ namespace RetailSystem.Infrastructure.Services
 
             item.Quantity = quantity;
 
-            //await _context.SaveChangesAsync();
             await _uow.SaveChangesAsync();
         }
 
         public async Task ClearCartAsync(string userId)
         {
-            //var cart = await _context.Carts
-            //    .Include(c => c.Items)
-            //    .FirstOrDefaultAsync(c => c.UserId == userId);
             var cart = await _uow.Carts.GetFirstOrDefaultAsync(c => c.UserId == userId, "Items");
 
             if (cart == null) return;
 
             cart.Items.Clear();
 
-            //await _context.SaveChangesAsync();
             await _uow.SaveChangesAsync();
         }
 

@@ -37,12 +37,19 @@ namespace RetailSystem.Infrastructure.Services
             {
 
                 var result = await _uow.Categories.GetAllAsync();
+                if (result == null)
+                {
+                    return new ServiceResult<List<Category>>
+                    {
+                        IsSuccess = true,
+                        Data = result?.ToList()
+                    };
+                }
                 categories = result.ToList();
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(TimeSpan.FromMinutes(5)) 
                 .SetAbsoluteExpiration(TimeSpan.FromHours(1));
 
-                // 4. Lưu vào cache
                 _cache.Set(_cacheKey, categories, cacheEntryOptions);
             }
             return new ServiceResult<List<Category>>

@@ -63,7 +63,7 @@ namespace RetailSystem.Infrastructure.Services
             {
                 _logger.LogInformation($"Cache miss for category {id}. Fetching from database...");
 
-                // Gọi Repo thông qua UoW với filter và include
+                // call Repo by UoW with filter and include
                 var resultFromDb = await _uow.Products.GetAllAsync(
                     filter: p => p.CategoryId == id,
                     includeProperties: "Images,Category"
@@ -105,12 +105,11 @@ namespace RetailSystem.Infrastructure.Services
                 ChipSet = model.ChipSet,
                 CategoryId = model.CategoryId,
 
-                Images = model.ImageUrls.Select(url => new ProductImage
+                Images = model.ImageUrls?.Select(url => new ProductImage
                 {
                     Url = url
-                }).ToList()
+                }).ToList() ?? new List<ProductImage>()
             };
-
             await _uow.Products.CreateAsync(product);
             await _uow.SaveChangesAsync();
 
