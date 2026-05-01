@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RetailSystem.API\RetailSystem.API.csproj" />
+    <ProjectReference Include="..\RetailSystem.CustomerSite\RetailSystem.CustomerSite.csproj" />
     <ProjectReference Include="..\RetailSystem.Domain\RetailSystem.Domain.csproj" />
     <ProjectReference Include="..\RetailSystem.Infrastructure\RetailSystem.Infrastructure.csproj" />
     <ProjectReference Include="..\RetailSystem.Shared\RetailSystem.Shared.csproj" />
@@ -25,10 +26,6 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Domain\" />
   </ItemGroup>
 
 </Project>

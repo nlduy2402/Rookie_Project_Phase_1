@@ -40,7 +40,7 @@ namespace RetailSystem.CustomerSite.Controllers
 
             if (result.Succeeded)
             {
-                // gán role Customer
+                //role Customer
                 await _userManager.AddToRoleAsync(user, "Customer");
 
                 await _signInManager.SignInAsync(user, isPersistent: false);
