@@ -28,7 +28,7 @@ namespace RetailSystem.Tests.Service
             _cartRepoMock = new Mock<IBaseRepository<Cart>>();
             _productRepoMock = new Mock<IBaseRepository<Product>>();
 
-            _uowMock.Setup(x => x.Carts).Returns(_cartRepoMock.Object);
+            //_uowMock.Setup(x => x.Carts).Returns(_cartRepoMock.Object);
             _uowMock.Setup(x => x.Products).Returns(_productRepoMock.Object);
 
             var cache = new MemoryCache(new MemoryCacheOptions());

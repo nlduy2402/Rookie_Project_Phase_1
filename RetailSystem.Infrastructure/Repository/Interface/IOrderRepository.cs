@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace RetailSystem.Infrastructure.Repository.Interface
 {
-    public interface ICartRepository : IBaseRepository<Cart>
+    public interface IOrderRepository : IBaseRepository<Order>
     {
-        Task<Cart?> GetCartByUserIdAsync(string userId);
-        void ClearCart(Cart cart);
+        Task<IEnumerable<Order>> GetOrdersByUserIdAsync(string userId);
+        Task<Order?> GetOrderWithDetailsAsync(int orderId);
     }
 }

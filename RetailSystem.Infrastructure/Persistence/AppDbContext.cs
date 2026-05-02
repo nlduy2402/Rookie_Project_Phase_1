@@ -17,6 +17,8 @@ namespace RetailSystem.Infrastructure.Persistence
         public DbSet<AdminAccount> AdminAccounts { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -64,6 +66,31 @@ namespace RetailSystem.Infrastructure.Persistence
             .WithMany()
             .HasForeignKey(ci => ci.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrderDetail>(entity =>
+            {
+                entity.Property(e => e.Price)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.HasOne(d => d.Order)
+                    .WithMany(p => p.OrderDetails)
+                    .HasForeignKey(d => d.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade); 
+
+               
+                entity.HasOne(d => d.Product)
+                    .WithMany() 
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.Property(e => e.TotalAmount)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.HasIndex(e => e.UserId);
+            });
         }
     }
 }

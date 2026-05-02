@@ -16,7 +16,13 @@ namespace RetailSystem.Infrastructure.Repository.Interface
         IBaseRepository<Product> Products { get; }
         IBaseRepository<Category> Categories { get; } 
         IBaseRepository<AdminAccount> AdminAccounts { get; }
-        IBaseRepository<Cart> Carts { get; }
+        //IBaseRepository<Cart> Carts { get; }
+        ICartRepository Carts { get; }
+        //IBaseRepository<Order> Orders { get; }
+        IOrderRepository Orders { get; }
         Task<int> SaveChangesAsync();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RetailSystem.Infrastructure.Repository.Interface
 {
-    internal interface ICategoryRepository
+    public interface ICategoryRepository
     {
     }
 }
