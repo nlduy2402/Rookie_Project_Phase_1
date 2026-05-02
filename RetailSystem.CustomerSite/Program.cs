@@ -32,6 +32,8 @@ builder.Services.AddScoped<IProductService,ProductService>();
 builder.Services.AddScoped<ICategoryService,CategoryService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IVNPayService, VNPayService>();
 
 var app = builder.Build();
 

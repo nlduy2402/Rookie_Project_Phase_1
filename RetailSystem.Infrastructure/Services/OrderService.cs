@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using RetailSystem.Domain.Entities;
 using RetailSystem.Domain.Repository.Interface;
 using RetailSystem.Infrastructure.Repository;
@@ -25,7 +26,7 @@ namespace RetailSystem.Infrastructure.Services
         }
         protected override IBaseRepository<Order> GetRepository() => _uow.Orders;
 
-        public async Task<Order> CreateOrderAsync(string userId, OrderDTO orderDto)
+        public async Task<Order> CreateOrderAsync(string userId, OrderDTO orderDto, string PaymentMethod)
         {
             // 1. Lấy giỏ hàng
             var cart = await _uow.Carts.GetCartByUserIdAsync(userId);
@@ -41,7 +42,10 @@ namespace RetailSystem.Infrastructure.Services
                     Address = orderDto.Address,
                     PhoneNumber = orderDto.PhoneNumber,
                     OrderDate = DateTime.UtcNow,
-                    TotalAmount = cart.Items.Sum(x => x.Quantity * x.Product.Price)
+                    TotalAmount = cart.Items.Sum(x => x.Quantity * x.Product.Price),
+                    PaymentMethod = PaymentMethod,          
+                    PaymentStatus = PaymentStatus.Pending,  
+                    TxnRef = Guid.NewGuid().ToString("N")     
                 };
 
                 // 3. Chuyển CartItem sang OrderDetail và trừ kho
@@ -67,7 +71,7 @@ namespace RetailSystem.Infrastructure.Services
                 await _uow.Orders.CreateAsync(order);
 
                 // 5. Xóa giỏ hàng
-                _uow.Carts.ClearCart(cart);
+                //_uow.Carts.ClearCart(cart);
 
 
                 await _uow.SaveChangesAsync();
@@ -76,6 +80,71 @@ namespace RetailSystem.Infrastructure.Services
                 return order;
             }
             catch (Exception)
+            {
+                await _uow.RollbackTransactionAsync();
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Order>> GetOrderHistoryAsync(string userId)
+        {
+
+            return await _uow.Orders.GetOrderHistoryByUserIdAsync(userId);
+        }
+        public async Task<Order?> GetByTxnRefAsync(string txnRef)
+        {
+            return await _uow.Orders.GetFirstOrDefaultAsync(x => x.TxnRef == txnRef);
+        }
+        public async Task UpdatePaymentStatusAsync(Order order, PaymentStatus paymentStatus)
+        {
+            order.PaymentStatus = paymentStatus;
+
+            if (paymentStatus == PaymentStatus.Paid)
+            {
+                order.Status = OrderStatus.Processing;
+            }
+
+            await _uow.SaveChangesAsync();
+        }
+        public async Task CancelOrderAsync(int orderId, string userId)
+        {
+            var order = await _uow.Orders.GetOrderWithDetailsAsync(orderId);
+
+
+            if (order == null)
+                throw new Exception("Order not found");
+
+            if (order.UserId != userId)
+                throw new Exception("Unauthorized");
+
+            if (order.PaymentMethod != "COD")
+                throw new Exception("Only COD orders can be cancelled");
+
+            if (order.Status == OrderStatus.Completed || order.Status == OrderStatus.Cancelled)
+                throw new Exception("Cannot cancel this order");
+
+            await _uow.BeginTransactionAsync();
+            try
+            {
+                foreach (var item in order.OrderDetails)
+                {
+                    var product = await _uow.Products.GetByIdAsync(item.ProductId);
+
+                    if (product == null)
+                        throw new Exception($"Product {item.ProductId} not found");
+
+                    product.Quantity += item.Quantity;
+                }
+
+                // 3. Update order
+                order.Status = OrderStatus.Cancelled;
+                order.PaymentStatus = PaymentStatus.Failed;
+
+                // 4. Save
+                await _uow.SaveChangesAsync();
+                await _uow.CommitTransactionAsync();
+            }
+            catch
             {
                 await _uow.RollbackTransactionAsync();
                 throw;

@@ -23,6 +23,16 @@ namespace RetailSystem.Domain.Entities
         public List<OrderDetail> OrderDetails { get; set; } = new();
         [ForeignKey("UserId")]
         public virtual User? User { get; set; }
+
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+        public string PaymentMethod { get; set; } = "COD"; // hoặc VNPay
+        public string? TxnRef { get; set; } // lưu vnp_TxnRef
     }
     public enum OrderStatus { Pending, Processing, Shipped, Completed, Cancelled }
+    public enum PaymentStatus
+    {
+        Pending,
+        Paid,
+        Failed
+    }
 }

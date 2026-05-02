@@ -12,5 +12,6 @@ namespace RetailSystem.Shared.ViewModels
     {
         public OrderDTO OrderData { get; set; } = new();
         public List<CartItem> CartItems { get; set; } = new();
+        public string PaymentMethod { get; set; } = "COD"; // hoặc "VNPay"
     }
 }

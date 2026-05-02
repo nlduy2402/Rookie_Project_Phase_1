@@ -113,36 +113,63 @@
                     <div class="col-lg-4 col-md-4 col-12">
                         <div class="top-end">
 
-                            <div class="user">
-                                <i class="lni lni-user"></i>
+                            <div class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="lni lni-user me-2"></i>
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <span>Hi, @User.Identity.Name</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Account</span>
+                                    }
+                                </a>
 
-                                @if (User.Identity.IsAuthenticated)
-                                {
-                                    <span>Hello @User.Identity.Name</span>
-                                }
-                                else
-                                {
-                                    <span></span>
-                                }
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <!-- Thông tin Profile -->
+                                        <li>
+                                            <a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile">
+                                                <i class="bi bi-person-circle me-2"></i> Profile
+                                            </a>
+                                        </li>
+
+                                        <!-- Lịch sử đơn hàng -->
+                                        <li>
+                                            <a class="dropdown-item py-2" asp-controller="Order" asp-action="History">
+                                                <i class="bi bi-clock-history me-2"></i> Order History
+                                            </a>
+                                        </li>
+
+                                        <li><hr class="dropdown-divider"></li>
+
+                                        <!-- Đăng xuất -->
+                                        <li>
+                                            <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item py-2 text-danger">
+                                                    <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li>
+                                            <a class="dropdown-item py-2" asp-controller="Account" asp-action="Login">
+                                                <i class="bi bi-box-arrow-in-right me-2"></i> Login
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2" asp-controller="Account" asp-action="Register">
+                                                <i class="bi bi-person-plus me-2"></i> Register
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
                             </div>
-
-                            <ul class="user-login">
-                                @if (User.Identity.IsAuthenticated)
-                                {
-                                    <li>
-                                        <a asp-controller="Account" asp-action="Logout">Logout</a>
-                                    </li>
-                                }
-                                else
-                                {
-                                    <li>
-                                        <a asp-controller="Account" asp-action="Login">Sign In</a>
-                                    </li>
-                                    <li>
-                                        <a asp-controller="Account" asp-action="Register">Register</a>
-                                    </li>
-                                }
-                            </ul>
 
                         </div>
                     </div>

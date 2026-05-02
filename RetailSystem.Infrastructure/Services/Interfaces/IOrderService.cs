@@ -10,6 +10,10 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
 {
     public interface IOrderService
     {
-        Task<Order> CreateOrderAsync(string userId, OrderDTO model);
+        Task<Order> CreateOrderAsync(string userId, OrderDTO model, string PaymentMethod);
+        Task<IEnumerable<Order>> GetOrderHistoryAsync(string userId);
+        Task<Order?> GetByTxnRefAsync(string txnRef);
+        Task UpdatePaymentStatusAsync(Order order, PaymentStatus paymentStatus);
+        Task CancelOrderAsync(int orderId, string userId);
     }
 }

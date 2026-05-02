@@ -12,5 +12,6 @@ namespace RetailSystem.Infrastructure.Repository.Interface
     {
         Task<IEnumerable<Order>> GetOrdersByUserIdAsync(string userId);
         Task<Order?> GetOrderWithDetailsAsync(int orderId);
+        Task<IEnumerable<Order>> GetOrderHistoryByUserIdAsync(string userId);
     }
 }

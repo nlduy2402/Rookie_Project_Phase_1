@@ -32,5 +32,14 @@ namespace RetailSystem.Infrastructure.Repository
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<Order>> GetOrderHistoryByUserIdAsync(string userId)
+        {
+            return await _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .OrderByDescending(o => o.OrderDate) // Đơn hàng mới nhất lên đầu
+                .ToListAsync();
+        }
     }
 }

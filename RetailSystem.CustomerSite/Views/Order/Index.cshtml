@@ -88,7 +88,7 @@
 @*         User Shipping Information*@        
         <div class="col-md-6 col-lg-6">
             <h4 class="mb-3 border-bottom pb-2">Delivery information</h4>
-            <form asp-action="CreateOrder" asp-controller="Order" method="post" class="needs-validation">
+            <form asp-action="Create" asp-controller="Order" method="post" class="needs-validation">
                 <div class="row g-3">
                     <div class="col-12">
                         <label asp-for="OrderData.FullName" class="form-label">Full Name</label>
@@ -119,12 +119,12 @@
                 <h4 class="mb-3">Payment Method</h4>
                 <div class="my-3">
                     <div class="form-check">
-                        <input id="cod" name="paymentMethod" type="radio" class="form-check-input" checked required>
+                        <input id="cod" name="paymentMethod" type="radio" class="form-check-input" value="COD" checked required>
                         <label class="form-check-label" for="cod">Cash On Delivery (COD)</label>
                     </div>
                     <div class="form-check">
-                        <input id="vnpay" name="paymentMethod" type="radio" class="form-check-input" disabled>
-                        <label class="form-check-label" for="vnpay">Online Payment (VNPay) - <span class="badge bg-secondary">Coming Soon</span></label>
+                        <input id="vnpay" name="paymentMethod" type="radio" class="form-check-input" value="VNPay">
+                        <label class="form-check-label" for="vnpay">Online Payment (VNPay)</label>
                     </div>
                 </div>
 

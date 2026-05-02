@@ -1,0 +1,420 @@
+﻿@* @using RetailSystem.Domain.Entities
+@model IEnumerable<RetailSystem.Domain.Entities.Order>
+
+<style>
+    /* Tăng kích thước chữ chung cho bảng */
+    .table-history {
+        font-size: 1.rem; /* Chữ to hơn một chút so với mặc định */
+    }
+
+    /* Tạo hiệu ứng ảnh sản phẩm xếp chồng nhẹ nếu có nhiều ảnh */
+    .product-img-stack {
+        display: flex;
+        align-items: center;
+    }
+
+    .product-thumb {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-right: -15px; /* Xếp chồng nhẹ */
+        transition: transform 0.2s;
+    }
+
+        .product-thumb:hover {
+            transform: scale(1.2);
+            z-index: 10;
+            margin-right: 5px;
+        }
+</style>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">
+            <i class="bi bi-bag-check-fill text-primary me-2"></i>ORDER HISTORY
+        </h2>
+
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Continue Shopping
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 bg-white shadow-sm rounded-4">
+            <h4 class="text-muted">You don't have any order!</h4>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr class="text-uppercase small fw-bold">
+                            <th class="ps-4 py-3">CODE</th>
+                            <th>Product</th>
+                            <th>Total</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th class="text-center pe-4">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <!-- ORDER INFO -->
+                                <td class="ps-4">
+                                    <span class="fw-bold text-primary">#@order.Id</span>
+                                    <div class="text-muted small">
+                                        @order.OrderDate.ToString("dd/MM/yyyy")
+                                    </div>
+                                </td>
+
+                                <!-- PRODUCTS -->
+                                <td>
+                                    <div class="small">
+                                        @foreach (var detail in order.OrderDetails.Take(2))
+                                        {
+                                            <div>• @detail.Product.Name (@detail.Quantity)</div>
+                                        }
+
+                                        @if (order.OrderDetails.Count > 2)
+                                        {
+                                            <span class="text-muted">
+                                                ...and @(order.OrderDetails.Count - 2) more
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+
+                                <!-- TOTAL -->
+                                <td>
+                                    <span class="fs-5 fw-bold text-danger">
+                                        @order.TotalAmount.ToString("N0")₫
+                                    </span>
+                                    <div class="small text-muted">
+                                        @order.OrderDetails.Sum(x => x.Quantity) items
+                                    </div>
+                                </td>
+
+                                <!-- PAYMENT -->
+                                <td>
+                                    <div class="mb-1">
+                                        @if (order.PaymentMethod == "VNPay")
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary px-2 py-1">
+                                                VNPay
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary px-2 py-1">
+                                                COD
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <!-- Payment status -->
+                                    @if (order.PaymentStatus == PaymentStatus.Paid)
+                                    {
+                                        <span class="badge bg-success-subtle text-success px-2 py-1">
+                                            <i class="bi bi-check-circle me-1"></i> Paid
+                                        </span>
+                                    }
+                                    else if (order.PaymentStatus == PaymentStatus.Failed)
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger px-2 py-1">
+                                            <i class="bi bi-x-circle me-1"></i> Failed
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning px-2 py-1">
+                                            <i class="bi bi-clock me-1"></i> Pending
+                                        </span>
+                                    }
+                                </td>
+
+                                <!-- ORDER STATUS -->
+                                <td>
+                                    @{
+                                        string statusClass = "bg-secondary-subtle text-secondary";
+                                        string icon = "bi-clock";
+
+                                        switch (order.Status)
+                                        {
+                                            case OrderStatus.Pending:
+                                                statusClass = "bg-warning-subtle text-warning";
+                                                icon = "bi-hourglass";
+                                                break;
+
+                                            case OrderStatus.Processing:
+                                                statusClass = "bg-info-subtle text-info";
+                                                icon = "bi-gear";
+                                                break;
+
+                                            case OrderStatus.Shipped:
+                                                statusClass = "bg-primary-subtle text-primary";
+                                                icon = "bi-truck";
+                                                break;
+
+                                            case OrderStatus.Completed:
+                                                statusClass = "bg-success-subtle text-success";
+                                                icon = "bi-check-circle";
+                                                break;
+
+                                            case OrderStatus.Cancelled:
+                                                statusClass = "bg-danger-subtle text-danger";
+                                                icon = "bi-x-circle";
+                                                break;
+                                        }
+                                    }
+
+                                    <span class="badge rounded-pill @statusClass px-3 py-2">
+                                        <i class="bi @icon me-1"></i> @order.Status
+                                    </span>
+                                </td>
+
+                                <!-- ACTION -->
+                                <td class="text-center pe-4">
+                                    <a asp-action="Details" asp-route-id="@order.Id"
+                                       class="btn btn-sm btn-dark rounded-pill px-3 shadow-sm">
+                                        Detail
+                                    </a>
+
+                                    <!-- Retry VNPay -->
+                                    @if (order.PaymentMethod == "VNPay"
+                                   && order.PaymentStatus == PaymentStatus.Failed)
+                                    {
+                                        <a asp-action="RetryPayment" asp-route-id="@order.Id"
+                                           class="btn btn-sm btn-warning rounded-pill px-3 ms-1">
+                                            Retry
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div> *@
+
+@using RetailSystem.Domain.Entities
+@model IEnumerable<RetailSystem.Domain.Entities.Order>
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">
+            <i class="bi bi-bag-check-fill text-primary me-2"></i>Order History
+        </h2>
+
+        <a asp-controller="Home" asp-action="Index"
+           class="btn btn-outline-primary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Continue Shopping
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 bg-white shadow-sm rounded-4">
+            <h4 class="text-muted">You don't have any order!</h4>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var order in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card order-card border-0 shadow-sm h-100 rounded-4">
+
+                        <!-- HEADER -->
+                        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-primary">#@order.Id</span>
+
+                            <span class="badge bg-light text-dark">
+                                @order.OrderDate.ToString("dd/MM/yyyy")
+                            </span>
+                        </div>
+
+                        <!-- BODY -->
+                        <div class="card-body">
+
+                            <!-- PRODUCTS -->
+                            <div class="mb-3">
+                                <div class="small text-muted mb-1">Products</div>
+
+                                @foreach (var item in order.OrderDetails.Take(2))
+                                {
+                                    <div class="fw-semibold">
+                                        @item.Product.Name
+                                        <span class="text-muted">(@item.Quantity)</span>
+                                    </div>
+                                }
+
+                                @if (order.OrderDetails.Count > 2)
+                                {
+                                    <div class="text-muted small">
+                                        +@(order.OrderDetails.Count - 2) more items
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- TOTAL -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted small">Total</span>
+                                <span class="fw-bold text-danger fs-5">
+                                    @order.TotalAmount.ToString("N0")₫
+                                </span>
+                            </div>
+
+                            <!-- STATUS ROW -->
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <!-- PAYMENT -->
+                                <div>
+                                    <div class="small text-muted">Payment</div>
+
+                                    <span class="badge @(order.PaymentMethod == "VNPay" ? "bg-primary-subtle text-primary" : "bg-secondary-subtle text-secondary")">
+                                        @order.PaymentMethod
+                                    </span>
+
+                                    @if (order.PaymentStatus == PaymentStatus.Paid)
+                                    {
+                                        <span class="badge bg-success-subtle text-success ms-1">Paid</span>
+                                    }
+                                    else if (order.PaymentStatus == PaymentStatus.Failed)
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger ms-1">Failed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning ms-1">Pending</span>
+                                    }
+                                </div>
+
+                                <!-- ORDER STATUS -->
+                                <div class="text-end">
+                                    <div class="small text-muted">Status</div>
+
+                                    @{
+                                        string statusClass = "bg-warning-subtle text-warning";
+                                        if (order.Status == OrderStatus.Processing)
+                                            statusClass = "bg-info-subtle text-info";
+                                        else if (order.Status == OrderStatus.Shipped)
+                                            statusClass = "bg-primary-subtle text-primary";
+                                        else if (order.Status == OrderStatus.Completed)
+                                            statusClass = "bg-success-subtle text-success";
+                                        else if (order.Status == OrderStatus.Cancelled)
+                                            statusClass = "bg-danger-subtle text-danger";
+                                    }
+
+                                    <span class="badge @statusClass px-3 py-2">
+                                        @order.Status
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FOOTER -->
+                        <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
+
+                            <a asp-action="Details" asp-route-id="@order.Id"
+                               class="btn btn-sm btn-outline-dark rounded-pill">
+                                View Detail
+                            </a>
+
+                            <div class="d-flex gap-2">
+
+                                <!-- COD -->
+                                @if (order.PaymentMethod == "COD"
+                               && order.Status != OrderStatus.Completed
+                               && order.Status != OrderStatus.Cancelled)
+                                {
+                                    <form asp-action="Received" method="post" asp-route-id="@order.Id">
+                                        <button class="btn btn-success btn-sm rounded-pill">
+                                            Received
+                                        </button>
+                                    </form>
+
+                                    <form asp-action="Cancel" method="post" asp-route-id="@order.Id">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-outline-danger btn-sm rounded-pill">
+                                            Cancel
+                                        </button>
+                                    </form>
+                                }
+
+                                <!-- VNPay -->
+                                @if (order.PaymentMethod == "VNPay"
+                               && order.PaymentStatus == PaymentStatus.Paid
+                               && order.Status != OrderStatus.Completed)
+                                {
+                                    <form asp-action="Received" method="post" asp-route-id="@order.Id">
+                                        <button class="btn btn-success btn-sm rounded-pill">
+                                            Received
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+<style>
+    body {
+        background-color: #f5f7fb;
+    }
+    .card-body {
+        color: #2c3e50;
+    }
+    .order-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: all 0.25s ease;
+    }
+
+        .order-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+    .order-accent {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #0d6efd, #6f42c1);
+    }
+ </style>
