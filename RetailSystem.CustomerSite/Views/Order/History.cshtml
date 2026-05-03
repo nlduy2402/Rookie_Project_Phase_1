@@ -59,18 +59,31 @@
                             <div class="mb-3">
                                 <div class="small text-muted mb-1">Products</div>
 
-                                @foreach (var item in order.OrderDetails.Take(2))
+                                @foreach (var item in order.OrderDetails)
                                 {
-                                    <div class="fw-semibold">
-                                        @item.ProductName
-                                        <span class="text-muted">(@item.Quantity)</span>
-                                    </div>
-                                }
+                                    <div class="d-flex justify-content-between align-items-center py-1">
 
-                                @if (order.OrderDetails.Count > 2)
-                                {
-                                    <div class="text-muted small">
-                                        +@(order.OrderDetails.Count - 2) more items
+                                        <div class="fw-semibold">
+                                            @item.ProductName
+                                            <span class="text-muted">(@item.Quantity)</span>
+                                        </div>
+
+                                        @* ⭐ Rating icon nếu order completed + chưa review *@
+                                        @if (order.Status == OrderStatus.Completed && !item.IsReviewed)
+                                        {
+@*                                             <a  asp-controller="Review"
+                                                asp-action="Rate"
+                                               asp-route-id="@order.Id"
+                                               asp-route-productId="@item.ProductId"
+                                               class="text-warning ms-2"
+                                               title="Rate this product">
+                                                <i class="bi bi-star-fill"></i>
+                                            </a> *@
+                                            <a href="javascript:void(0);"
+                                               onclick="handleRating(@order.Id, @item.ProductId)">
+                                                <i class="bi bi-star text-warning"></i>
+                                            </a>
+                                        }
                                     </div>
                                 }
                             </div>
@@ -137,36 +150,44 @@
 
                             <div class="d-flex gap-2">
 
-                                @if (order.PaymentMethod == "COD"
-                               && order.Status != OrderStatus.Completed
-                               && order.Status != OrderStatus.Cancelled)
+                                @* CANCEL: chỉ Pending + Processing *@
+                                @if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Processing)
                                 {
-                                    <form asp-action="Received" method="post" asp-route-id="@order.Id">
-                                        <button class="btn btn-success btn-sm rounded-pill">
-                                            Received
+                                    <form asp-action="Ship" method="post" asp-route-id="@order.Id">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-outline-info btn-sm rounded-pill">
+                                            Shipped
                                         </button>
                                     </form>
-
                                     <form asp-action="Cancel" method="post" asp-route-id="@order.Id">
                                         @Html.AntiForgeryToken()
                                         <button class="btn btn-outline-danger btn-sm rounded-pill">
                                             Cancel
                                         </button>
                                     </form>
+
                                 }
 
-                                @if (order.PaymentMethod == "VNPay"
-                               && order.PaymentStatus == PaymentStatus.Paid
-                               && order.Status != OrderStatus.Completed)
+                                @* RECEIVED: chỉ Shipped *@
+                                @if (order.Status == OrderStatus.Shipped)
                                 {
                                     <form asp-action="Received" method="post" asp-route-id="@order.Id">
+                                        @Html.AntiForgeryToken()
                                         <button class="btn btn-success btn-sm rounded-pill">
                                             Received
                                         </button>
                                     </form>
                                 }
-                            </div>
 
+                                @* COMPLETED: không có button *@
+                                @if (order.Status == OrderStatus.Completed)
+                                {
+                                    <span class="badge bg-success-subtle text-success px-3 py-2">
+                                        Completed
+                                    </span>
+                                }
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -234,4 +255,71 @@
         height: 4px;
         background: linear-gradient(90deg, #0d6efd, #6f42c1);
     }
+
+    .toast-msg {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #333;
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        opacity: 0;
+        transition: 0.3s;
+        z-index: 9999;
+    }
+
+        .toast-msg.show {
+            opacity: 1;
+        }
+
+        .toast-msg.error {
+            background: #dc3545;
+        }
+
+        .toast-msg.success {
+            background: #28a745;
+        }
  </style>
+<script>
+    setTimeout(() => {
+        let alert = document.getElementById("alertBox");
+        if (alert) {
+            alert.classList.remove("show"); // fade out
+            alert.classList.add("fade");
+
+            setTimeout(() => {
+                alert.remove();
+            }, 500);
+        }
+    }, 3000); 
+
+    async function handleRating(orderId, productId) {
+
+    const res = await fetch(`/Review/CheckReviewed?orderId=${orderId}&productId=${productId}`);
+    const data = await res.json();
+
+    if (data.isReviewed) {
+        showToast("You already reviewed this product!", "error");
+        return;
+    }
+
+    window.location.href = `/Review/Rate?id=${orderId}&productId=${productId}`;
+    }
+        function showToast(message, type = "success") {
+        const toast = document.createElement("div");
+
+        toast.className = `toast-msg ${type}`;
+        toast.innerText = message;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add("show");
+        }, 100);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+</script>

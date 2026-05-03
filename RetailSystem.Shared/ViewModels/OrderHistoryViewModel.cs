@@ -32,7 +32,9 @@ namespace RetailSystem.Shared.ViewModels
 
     public class OrderDetailVM
     {
+        public int ProductId { get; set; }
         public string ProductName { get; set; }
         public int Quantity { get; set; }
+        public bool IsReviewed { get; set; } = false;
     }
 }

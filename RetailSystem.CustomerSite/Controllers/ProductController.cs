@@ -11,11 +11,12 @@ namespace RetailSystem.CustomerSite.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
-
-        public ProductController(IProductService productService, ICategoryService categoryService)
+        private readonly IReviewService _reviewService;
+        public ProductController(IProductService productService, ICategoryService categoryService, IReviewService reviewService)
         {
             _productService = productService;
             _categoryService = categoryService;
+            _reviewService = reviewService;
         }
 
         //public async Task<IActionResult> Index()
@@ -51,7 +52,9 @@ namespace RetailSystem.CustomerSite.Controllers
             {
                 return View("Error");
             }
-            var vm = result?.Data?.ToDetailVM();
+            var reviews = await _reviewService.GetProductReviewsAsync(id);
+
+            var vm = result.Data.ToDetailVM(reviews);
             return View(vm);
 
         }

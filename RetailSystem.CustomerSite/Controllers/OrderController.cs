@@ -121,8 +121,9 @@ namespace RetailSystem.CustomerSite.Controllers
 
                     OrderDetails = o.OrderDetails.Select(d => new OrderDetailVM
                     {
+                        ProductId = d.ProductId,
                         ProductName = d.Product.Name,
-                        Quantity = d.Quantity
+                        Quantity = d.Quantity,
                     }).ToList()
                 }).ToList()
             };
@@ -168,6 +169,46 @@ namespace RetailSystem.CustomerSite.Controllers
                 await _orderService.CancelOrderAsync(id, userId);
 
                 TempData["SuccessMessage"] = "Order cancelled successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction("History");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Ship(int id)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+
+                await _orderService.ShipOrderAsync(id, userId);
+
+                TempData["SuccessMessage"] = "Order shipped!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction("History");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Received(int id)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+
+                await _orderService.CompleteOrderAsync(id, userId);
+
+                TempData["SuccessMessage"] = "Order completed!";
             }
             catch (Exception ex)
             {

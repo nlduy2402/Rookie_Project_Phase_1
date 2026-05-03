@@ -1,0 +1,47 @@
+﻿
+.rating-box {
+    background: #fff8e1; /* vàng rất nhẹ */
+    border: 1px solid #ffe082;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ⭐ số điểm */
+.rating-score {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f57c00;
+}
+
+/* ⭐ stars */
+.rating-stars i {
+    font-size: 16px;
+    margin-right: 2px;
+}
+
+/* ⭐ review count */
+.rating-count {
+    font-size: 14px;
+    color: #777;
+}
+
+/* 📝 review item */
+.review-item {
+    background: #fafafa;
+    border-radius: 10px;
+    padding: 12px;
+    transition: 0.2s;
+}
+
+    .review-item:hover {
+        background: #f1f1f1;
+    }
+
+/* ⭐ stars trong review */
+.review-stars i {
+    color: #ffc107;
+    font-size: 14px;
+}

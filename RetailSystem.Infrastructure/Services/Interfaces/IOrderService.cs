@@ -17,6 +17,9 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
         Task UpdatePaymentStatusAsync(Order order, PaymentStatus paymentStatus);
         Task CancelOrderAsync(int orderId, string userId);
         Task<ServiceResult<PageResult<Order>>> GetUserOrdersPagedAsync(string userId, int page, int pageSize);
+        Task<Order> GetOrderWithDetailsAsync(int orderId, string userId);
+        Task ShipOrderAsync(int orderId, string userId);
+        Task CompleteOrderAsync(int orderId, string userId);
 
     }
 }

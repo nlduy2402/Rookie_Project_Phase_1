@@ -16,6 +16,7 @@ using RetailSystem.Infrastructure.Repository.Interface;
 using Microsoft.Identity.Client;
 using RetailSystem.Domain.Repository.Interface;
 using RetailSystem.Shared.ResponseModels;
+using RetailSystem.Shared.ViewModels;
 
 namespace RetailSystem.Infrastructure.Services
 {
@@ -55,6 +56,51 @@ namespace RetailSystem.Infrastructure.Services
             if (product == null) return new ServiceResult<Product> { IsSuccess = false, Message = "Product Not Exist" };
 
             return new ServiceResult<Product> { IsSuccess = true, Data = product };
+        }
+        public async Task<ServiceResult<ProductDetailViewModel>> GetProductByIdWithReviewAsync(int id)
+        {
+            var product = await _uow.Products.GetFirstOrDefaultAsync(
+                p => p.Id == id,
+                "Images,Category"
+            );
+
+            if (product == null)
+            {
+                return new ServiceResult<ProductDetailViewModel>
+                {
+                    IsSuccess = false,
+                    Message = "Product Not Exist"
+                };
+            }
+
+            // ⭐ LẤY REVIEW
+            var reviews = await _uow.Reviews.GetByProductIdAsync(product.Id);
+
+            // ⭐ MAP VM
+            var vm = new ProductDetailViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Images = product.Images.Select(x => x.Url).ToList(),
+
+                // ⭐ rating
+                TotalReviews = reviews.Count,
+                AverageRating = reviews.Any()
+                    ? reviews.Average(r => r.Rating)
+                    : 0,
+
+                Reviews = reviews.Select(r => new ReviewViewModel
+                {
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                }).ToList()
+            };
+
+            return new ServiceResult<ProductDetailViewModel>
+            {
+                IsSuccess = true,
+                Data = vm
+            };
         }
         public async Task<ServiceResult<List<Product>>> GetByCategory(int id)
         {

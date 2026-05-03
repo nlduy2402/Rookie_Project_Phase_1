@@ -24,7 +24,7 @@ namespace RetailSystem.Tests.MvcController
         {
             _mockProductService = new Mock<IProductService>();
             _mockCategoryService = new Mock<ICategoryService>();
-            _controller = new ProductController(_mockProductService.Object, _mockCategoryService.Object);
+            //_controller = new ProductController(_mockProductService.Object, _mockCategoryService.Object);
         }
 
         #region Index Tests

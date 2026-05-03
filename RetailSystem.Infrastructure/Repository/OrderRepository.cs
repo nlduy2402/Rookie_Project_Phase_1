@@ -40,7 +40,7 @@ namespace RetailSystem.Infrastructure.Repository
         {
             return await _context.Orders
                 .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Product)
+                .ThenInclude(od => od.Product).ThenInclude(p => p.Images)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
         }
 

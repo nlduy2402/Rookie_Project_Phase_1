@@ -64,7 +64,7 @@ namespace RetailSystem.Shared.Extensions
             };
         }
 
-        public static ProductDetailViewModel ToDetailVM(this Product p)
+        public static ProductDetailViewModel ToDetailVM(this Product p, List<Review>? reviews = null)
         {
             return new ProductDetailViewModel
             {
@@ -78,7 +78,20 @@ namespace RetailSystem.Shared.Extensions
 
                 ChipSet = p.ChipSet,
                 RAM = p.RAM,
-                SSD = p.SSD
+                SSD = p.SSD,
+
+                TotalReviews = reviews?.Count ?? 0,
+
+                AverageRating = (reviews != null && reviews.Any())
+            ? reviews.Average(r => r.Rating)
+            : 0,
+
+                Reviews = reviews?.Select(r => new ReviewViewModel
+                {
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    CreatedAt = r.CreatedAt
+                }).ToList() ?? new List<ReviewViewModel>()
             };
         }
     }

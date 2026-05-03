@@ -164,5 +164,74 @@ namespace RetailSystem.Infrastructure.Services
 
             };
         }
+        public async Task<Order> GetOrderWithDetailsAsync(int orderId, string userId)
+        {
+            var order = await _uow.Orders.GetOrderWithDetailsAsync(orderId);
+
+            if (order == null)
+                throw new Exception("Order not found");
+
+            if (order.UserId != userId)
+                throw new Exception("Unauthorized");
+
+            return order;
+        }
+        public async Task ShipOrderAsync(int orderId, string userId)
+        {
+            var order = await _uow.Orders.GetByIdAsync(orderId);
+
+            if (order == null)
+                throw new Exception("Order not found");
+
+            if (order.UserId != userId)
+                throw new Exception("Unauthorized");
+
+            if (order.Status != OrderStatus.Processing && order.Status != OrderStatus.Pending)
+                throw new Exception("Order not ready to ship");
+
+            await _uow.BeginTransactionAsync();
+
+            try
+            {
+                order.Status = OrderStatus.Shipped;
+
+                await _uow.SaveChangesAsync();
+                await _uow.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _uow.RollbackTransactionAsync();
+                throw;
+            }
+        }
+
+        public async Task CompleteOrderAsync(int orderId, string userId)
+        {
+            var order = await _uow.Orders.GetByIdAsync(orderId);
+
+            if (order == null)
+                throw new Exception("Order not found");
+
+            if (order.UserId != userId)
+                throw new Exception("Unauthorized");
+
+            if (order.Status != OrderStatus.Shipped)
+                throw new Exception("Order is not ready to complete");
+
+            await _uow.BeginTransactionAsync();
+
+            try
+            {
+                order.Status = OrderStatus.Completed;
+
+                await _uow.SaveChangesAsync();
+                await _uow.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _uow.RollbackTransactionAsync();
+                throw;
+            }
+        }
     } 
 }

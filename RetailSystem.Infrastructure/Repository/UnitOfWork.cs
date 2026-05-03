@@ -25,6 +25,7 @@ namespace RetailSystem.Infrastructure.Repository
         public IBaseRepository<AdminAccount> AdminAccounts { get; private set; }
         public ICartRepository Carts { get; private set; }
         public IOrderRepository Orders { get; private set; }
+        public IReviewRepository Reviews { get; private set; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -35,6 +36,7 @@ namespace RetailSystem.Infrastructure.Repository
             //Carts = new BaseRepository<Cart>(_context);
             Carts = new CartRepository(_context);
             Orders = new OrderRepository(_context);
+            Reviews = new ReviewRepository(_context);
         }
 
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();

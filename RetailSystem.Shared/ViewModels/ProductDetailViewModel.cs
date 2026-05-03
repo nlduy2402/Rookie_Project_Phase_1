@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RetailSystem.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,5 +22,10 @@ namespace RetailSystem.Shared.ViewModels
         public string ChipSet { get; set; } = "";
         public string RAM { get; set; } = "";
         public string SSD { get; set; } = "";
+
+        public double AverageRating { get; set; } = 0;
+        public int TotalReviews { get; set; } = 0;
+        public List<ReviewViewModel> Reviews { get; set; } = new();
     }
 }
+

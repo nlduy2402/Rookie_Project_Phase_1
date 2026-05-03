@@ -19,6 +19,7 @@ namespace RetailSystem.Infrastructure.Persistence
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -91,6 +92,18 @@ namespace RetailSystem.Infrastructure.Persistence
 
                 entity.HasIndex(e => e.UserId);
             });
+
+            // Review: 1 user can only review 1 product per order
+            modelBuilder.Entity<Review>()
+            .HasIndex(r => new { r.ProductId, r.OrderId, r.UserId })
+            .IsUnique();
+
+            // Review has many images
+            modelBuilder.Entity<ReviewImage>()
+            .HasOne(i => i.Review)
+            .WithMany(r => r.Images)
+            .HasForeignKey(i => i.ReviewId)
+            .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

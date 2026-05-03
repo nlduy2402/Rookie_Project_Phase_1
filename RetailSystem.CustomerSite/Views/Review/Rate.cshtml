@@ -1,0 +1,57 @@
+﻿@using RetailSystem.Shared.ViewModels
+@model ReviewViewModel
+
+<div class="container py-5">
+
+    <div class="card shadow-sm border-0 rounded-4 p-4">
+
+        <!-- PRODUCT INFO -->
+        <div class="d-flex align-items-center mb-3">
+
+            <img src="@Model.ImageUrl"
+                 class="rounded me-3"
+                 style="width:80px;height:80px;object-fit:cover;" />
+
+            <div>
+                <h5 class="mb-1">@Model.ProductName</h5>
+                <small class="text-muted">Order #@Model.OrderId</small>
+            </div>
+
+        </div>
+
+        <!-- FORM -->
+        <form asp-action="Rate" method="post" asp-controller="Review">
+
+            <input type="hidden" asp-for="OrderId" />
+            <input type="hidden" asp-for="ProductId" />
+
+            <!-- STAR -->
+            <label class="form-label">Rating</label>
+            <select asp-for="Rating" class="form-select mb-3">
+                <option value="5">⭐⭐⭐⭐⭐</option>
+                <option value="4">⭐⭐⭐⭐</option>
+                <option value="3">⭐⭐⭐</option>
+                <option value="2">⭐⭐</option>
+                <option value="1">⭐</option>
+            </select>
+
+            <!-- COMMENT -->
+            <label class="form-label">Comment</label>
+            <textarea asp-for="Comment"
+                      class="form-control mb-3"
+                      placeholder="Share your experience..."></textarea>
+
+            <button class="btn btn-primary w-100">
+                Submit Review
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+</style>
