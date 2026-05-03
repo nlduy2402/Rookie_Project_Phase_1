@@ -1,5 +1,6 @@
 ﻿using RetailSystem.Domain.Entities;
 using RetailSystem.Shared.DTOs;
+using RetailSystem.Shared.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,11 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
     public interface IOrderService
     {
         Task<Order> CreateOrderAsync(string userId, OrderDTO model, string PaymentMethod);
-        Task<IEnumerable<Order>> GetOrderHistoryAsync(string userId);
+        //Task<IEnumerable<Order>> GetOrderHistoryAsync(string userId);
         Task<Order?> GetByTxnRefAsync(string txnRef);
         Task UpdatePaymentStatusAsync(Order order, PaymentStatus paymentStatus);
         Task CancelOrderAsync(int orderId, string userId);
+        Task<ServiceResult<PageResult<Order>>> GetUserOrdersPagedAsync(string userId, int page, int pageSize);
+
     }
 }

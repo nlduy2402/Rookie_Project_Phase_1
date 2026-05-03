@@ -13,7 +13,7 @@ namespace RetailSystem.Infrastructure.Repository.Interface
 {
     public interface IUnitOfWork
     {
-        IBaseRepository<Product> Products { get; }
+        IProductRepository Products { get; }
         IBaseRepository<Category> Categories { get; } 
         IBaseRepository<AdminAccount> AdminAccounts { get; }
         //IBaseRepository<Cart> Carts { get; }

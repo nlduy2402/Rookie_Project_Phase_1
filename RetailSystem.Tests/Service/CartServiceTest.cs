@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using RetailSystem.Shared.ResponseModels;
 
 namespace RetailSystem.Tests.Service
 {
@@ -29,7 +30,7 @@ namespace RetailSystem.Tests.Service
             _productRepoMock = new Mock<IBaseRepository<Product>>();
 
             //_uowMock.Setup(x => x.Carts).Returns(_cartRepoMock.Object);
-            _uowMock.Setup(x => x.Products).Returns(_productRepoMock.Object);
+            //_uowMock.Setup(x => x.Products).Returns(_productRepoMock.Object);
 
             var cache = new MemoryCache(new MemoryCacheOptions());
 

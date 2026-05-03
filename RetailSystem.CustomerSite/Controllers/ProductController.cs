@@ -18,11 +18,28 @@ namespace RetailSystem.CustomerSite.Controllers
             _categoryService = categoryService;
         }
 
-        public async Task<IActionResult> Index()
+        //public async Task<IActionResult> Index()
+        //{
+        //    var result = await _productService.GetAllProductAsync();
+        //    if (!result.IsSuccess) return BadRequest(result.Message);
+        //    var vm = result?.Data?.Select(p => p.ToCardVM()).ToList();
+
+        //    return View(vm);
+        //}
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var result = await _productService.GetAllProductAsync();
+            int pageSize = 8;
+
+            var result = await _productService.GetPagedAsync(page, pageSize);
             if (!result.IsSuccess) return BadRequest(result.Message);
-            var vm = result?.Data?.Select(p => p.ToCardVM()).ToList();
+
+
+            var vm = new ProductIndexViewModel
+            {
+                Items = result.Data.Items.Select(p => p.ToCardVM()).ToList(),
+                Page = result.Data.Page,
+                TotalPages = result.Data.TotalPages
+            };
 
             return View(vm);
         }

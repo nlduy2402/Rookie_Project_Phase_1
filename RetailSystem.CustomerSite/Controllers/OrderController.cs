@@ -71,7 +71,7 @@ namespace RetailSystem.CustomerSite.Controllers
                     await _cartService.ClearCartAsync(userId);
 
                     TempData["SuccessMessage"] = "Order Success!";
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("History", "Order");
                 }
 
                 // ✅ VNPay
@@ -98,12 +98,35 @@ namespace RetailSystem.CustomerSite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> History()
+        public async Task<IActionResult> History(int page = 1)
         {
+            int pageSize = 6;
             var userId = _userManager.GetUserId(User);
-            var orders = await _orderService.GetOrderHistoryAsync(userId);
+            var result = await _orderService.GetUserOrdersPagedAsync(userId, page, pageSize);
+            if (!result.IsSuccess) return BadRequest(result.Message);
 
-            return View(orders);
+            var vm = new OrderHistoryViewModel
+            {
+                Page = result.Data.Page,
+                TotalPages = result.Data.TotalPages,
+
+                Items = result.Data.Items.Select(o => new OrderItemVM
+                {
+                    Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    TotalAmount = o.TotalAmount,
+                    Status = o.Status,
+                    PaymentMethod = o.PaymentMethod,
+                    PaymentStatus = o.PaymentStatus,
+
+                    OrderDetails = o.OrderDetails.Select(d => new OrderDetailVM
+                    {
+                        ProductName = d.Product.Name,
+                        Quantity = d.Quantity
+                    }).ToList()
+                }).ToList()
+            };
+            return View(vm);
         }
 
         public async Task<IActionResult> PaymentReturn()

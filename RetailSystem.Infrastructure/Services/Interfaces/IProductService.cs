@@ -1,5 +1,6 @@
 ﻿using RetailSystem.Domain.Entities;
 using RetailSystem.Shared.DTOs;
+using RetailSystem.Shared.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
         Task<ServiceResult<Product>> UpdateAsync(UpdateProductDTO model);
         Task<ServiceResult<List<Product>>> GetByCategory(int id);
         new Task<ServiceResult<bool>> DeleteAsync(int id);
+        Task<ServiceResult<PageResult<Product>>> GetPagedAsync(int page, int pageSize);
 
     }
 }

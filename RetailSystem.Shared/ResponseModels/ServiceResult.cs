@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RetailSystem.Infrastructure.Services
+namespace RetailSystem.Shared.ResponseModels
 {
     public class ServiceResult<T>
     {

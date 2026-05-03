@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RetailSystem.Shared.ResponseModels;
 
 namespace RetailSystem.Infrastructure.Services
 {
@@ -19,7 +20,7 @@ namespace RetailSystem.Infrastructure.Services
     {
         private readonly IUnitOfWork _uow;
         private IMemoryCache _cache;
-        public OrderService(IUnitOfWork uow, IMemoryCache cache) : base(uow,cache)
+        public OrderService(IUnitOfWork uow, IMemoryCache cache) : base(uow, cache)
         {
             _uow = uow;
             _cache = cache;
@@ -43,9 +44,9 @@ namespace RetailSystem.Infrastructure.Services
                     PhoneNumber = orderDto.PhoneNumber,
                     OrderDate = DateTime.UtcNow,
                     TotalAmount = cart.Items.Sum(x => x.Quantity * x.Product.Price),
-                    PaymentMethod = PaymentMethod,          
-                    PaymentStatus = PaymentStatus.Pending,  
-                    TxnRef = Guid.NewGuid().ToString("N")     
+                    PaymentMethod = PaymentMethod,
+                    PaymentStatus = PaymentStatus.Pending,
+                    TxnRef = Guid.NewGuid().ToString("N")
                 };
 
                 // 3. Chuyển CartItem sang OrderDetail và trừ kho
@@ -86,11 +87,11 @@ namespace RetailSystem.Infrastructure.Services
             }
         }
 
-        public async Task<IEnumerable<Order>> GetOrderHistoryAsync(string userId)
-        {
+        //public async Task<IEnumerable<Order>> GetOrderHistoryAsync(string userId)
+        //{
 
-            return await _uow.Orders.GetOrderHistoryByUserIdAsync(userId);
-        }
+        //    return await _uow.Orders.GetOrderHistoryByUserIdAsync(userId);
+        //}
         public async Task<Order?> GetByTxnRefAsync(string txnRef)
         {
             return await _uow.Orders.GetFirstOrDefaultAsync(x => x.TxnRef == txnRef);
@@ -150,5 +151,18 @@ namespace RetailSystem.Infrastructure.Services
                 throw;
             }
         }
-    }
+
+        public async Task<ServiceResult<PageResult<Order>>> GetUserOrdersPagedAsync(
+            string userId, int page, int pageSize)
+        {
+            var result = await _uow.Orders.GetOrderHistoryByUserIdAsync(userId, page, pageSize);
+
+            return new ServiceResult<PageResult<Order>>
+            {
+                IsSuccess = true,
+                Data = result
+
+            };
+        }
+    } 
 }

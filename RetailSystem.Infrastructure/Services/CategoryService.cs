@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using RetailSystem.Infrastructure.Repository.Interface;
 using RetailSystem.Domain.Repository.Interface;
+using RetailSystem.Shared.ResponseModels;
 
 namespace RetailSystem.Infrastructure.Services
 {

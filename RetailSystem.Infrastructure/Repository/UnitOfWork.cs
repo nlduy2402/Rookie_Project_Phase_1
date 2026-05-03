@@ -19,7 +19,7 @@ namespace RetailSystem.Infrastructure.Repository
     {
         private readonly AppDbContext _context;
         private IDbContextTransaction? _transaction;
-        public IBaseRepository<Product> Products { get; private set; }
+        public IProductRepository Products { get; private set; }
         //public IProductRepository Products { get; set; }
         public IBaseRepository<Category> Categories { get; private set; }
         public IBaseRepository<AdminAccount> AdminAccounts { get; private set; }
@@ -29,7 +29,7 @@ namespace RetailSystem.Infrastructure.Repository
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
-            Products = new BaseRepository<Product>(_context);
+            Products = new ProductRepository(_context);
             Categories = new BaseRepository<Category>(_context);
             AdminAccounts = new BaseRepository<AdminAccount>(_context);
             //Carts = new BaseRepository<Cart>(_context);

@@ -1,6 +1,7 @@
 ﻿using RetailSystem.Domain.Entities;
 using RetailSystem.Domain.Models;
 using RetailSystem.Shared.DTOs;
+using RetailSystem.Shared.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

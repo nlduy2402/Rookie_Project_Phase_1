@@ -3,7 +3,7 @@
     ViewData["Title"] = "Shop";
 }
 
-@model List<ProductViewModel>
+@model ProductIndexViewModel
 
 <section class="trending-product section" style="margin-top: 12px;">
     <div class="container">
@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="row">
-            @foreach (var item in Model)
+            @foreach (var item in Model.Items)
             {
                 <div class="col-lg-3 col-md-6 col-12">
                     <!-- Start Single Product -->
@@ -59,6 +59,51 @@
                     <!-- End Single Product -->
                 </div>
             }
+        </div>
+
+        <div class="row">
+            <div class="col-12 text-center mt-4">
+
+                <!-- PREV -->
+                @if (Model.Page > 1)
+                {
+                    <a href="@Url.Action("Index", new { page = Model.Page - 1 })"
+                       class="btn btn-sm btn-outline-primary">
+                        « Prev
+                    </a>
+                }
+                else
+                {
+                    <span class="btn btn-sm btn-outline-secondary disabled">
+                        « Prev
+                    </span>
+                }
+
+                <!-- PAGE -->
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <a href="@Url.Action("Index", new { page = i })"
+                       class="btn btn-sm @(i == Model.Page ? "btn-primary" : "btn-outline-primary")">
+                        @i
+                    </a>
+                }
+
+                <!-- NEXT -->
+                @if (Model.Page < Model.TotalPages)
+                {
+                    <a href="@Url.Action("Index", new { page = Model.Page + 1 })"
+                       class="btn btn-sm btn-outline-primary">
+                        Next »
+                    </a>
+                }
+                else
+                {
+                    <span class="btn btn-sm btn-outline-secondary disabled">
+                        Next »
+                    </span>
+                }
+
+            </div>
         </div>
     </div>
 </section>

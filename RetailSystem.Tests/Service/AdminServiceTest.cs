@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using RetailSystem.Shared.ResponseModels;
 
 namespace RetailSystem.Tests.Service
 {

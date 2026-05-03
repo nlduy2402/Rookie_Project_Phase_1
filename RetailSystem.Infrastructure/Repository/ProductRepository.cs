@@ -16,5 +16,18 @@ namespace RetailSystem.Infrastructure.Repository
         public ProductRepository(AppDbContext context) : base(context)
         {
         }
+        public async Task<(IEnumerable<Product>, int totalCount)> GetPagedAsync(int page, int pageSize)
+        {
+            var query = _context.Products.Include(p=>p.Images).AsQueryable();
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
     }
 }

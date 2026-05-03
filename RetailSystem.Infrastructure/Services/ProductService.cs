@@ -15,6 +15,7 @@ using Microsoft.Extensions.Caching.Memory;
 using RetailSystem.Infrastructure.Repository.Interface;
 using Microsoft.Identity.Client;
 using RetailSystem.Domain.Repository.Interface;
+using RetailSystem.Shared.ResponseModels;
 
 namespace RetailSystem.Infrastructure.Services
 {
@@ -143,6 +144,23 @@ namespace RetailSystem.Infrastructure.Services
             _cache.Remove(ProductCacheKey);
 
             return new ServiceResult<bool> { IsSuccess = true };
+        }
+
+        public async Task<ServiceResult<PageResult<Product>>> GetPagedAsync(int page, int pageSize)
+        {
+            var (items, totalCount) = await _uow.Products.GetPagedAsync(page, pageSize);
+
+            return new ServiceResult<PageResult<Product>> {
+                IsSuccess = true,
+                Data = new PageResult<Product>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    Page = page,
+                    PageSize = pageSize
+                }
+            };
+        
         }
     }
 }

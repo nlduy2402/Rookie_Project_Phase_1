@@ -13,6 +13,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using RetailSystem.Shared.ResponseModels;
 
 namespace RetailSystem.Tests.Service
 {
@@ -152,7 +153,7 @@ namespace RetailSystem.Tests.Service
             var productRepoMock = new Mock<IBaseRepository<Product>>();
             var categoryRepoMock = new Mock<IBaseRepository<Category>>();
 
-            _uowMock.Setup(x => x.Products).Returns(productRepoMock.Object);
+            //_uowMock.Setup(x => x.Products).Returns(productRepoMock.Object);
             _uowMock.Setup(x => x.Categories).Returns(categoryRepoMock.Object);
 
             categoryRepoMock
