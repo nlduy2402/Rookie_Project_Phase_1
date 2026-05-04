@@ -26,13 +26,15 @@ namespace RetailSystem.Infrastructure.Services
         private readonly new IUnitOfWork _uow;
         private const string ProductCacheKey = "AllProducts";
         private readonly MemoryCacheEntryOptions _cacheOptions;
-        public ProductService(ILogger<ProductService> logger, IMemoryCache cache,IUnitOfWork uow) : base(uow, cache)
+        private readonly ICloudinaryService _cloudinaryService;
+        public ProductService(ILogger<ProductService> logger, IMemoryCache cache,IUnitOfWork uow, ICloudinaryService cloudinaryService) : base(uow, cache)
         {
             _logger = logger;
             _uow = uow;
             _cacheOptions = new MemoryCacheEntryOptions()
             .SetSlidingExpiration(TimeSpan.FromMinutes(5))
             .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+            _cloudinaryService = cloudinaryService;
         }
         protected override IBaseRepository<Product> GetRepository() => _uow.Products;
 
@@ -157,6 +159,24 @@ namespace RetailSystem.Infrastructure.Services
                     Url = url
                 }).ToList() ?? new List<ProductImage>()
             };
+            //if (model.Images != null && model.Images.Any())
+            //{
+            //    Console.WriteLine($"Received {model.Images.Count} images for upload.");
+            //    foreach (var file in model.Images)
+            //    {
+            //        var uploadResult = await _cloudinaryService.AddPhotoAsync(file);
+
+            //        if (uploadResult.Error == null)
+            //        {
+            //            var productImage = new ProductImage
+            //            {
+            //                Url = uploadResult.SecureUrl.AbsoluteUri,
+            //                Name = file.FileName,
+            //            };
+            //            product.Images.Add(productImage);
+            //        }
+            //    }
+            //}
             await _uow.Products.CreateAsync(product);
             await _uow.SaveChangesAsync();
 

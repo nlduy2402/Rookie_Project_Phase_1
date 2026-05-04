@@ -1,5 +1,5 @@
 using RetailSystem.Infrastructure.Persistence;
-
+using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using RetailSystem.Infrastructure.Services;
 using RetailSystem.Infrastructure.Services.Interfaces;
@@ -25,6 +25,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 builder.Services.Configure<JwtSetting>(
     builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -35,6 +36,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 var app = builder.Build();
 

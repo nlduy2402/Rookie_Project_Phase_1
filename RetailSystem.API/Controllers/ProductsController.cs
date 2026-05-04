@@ -42,6 +42,7 @@ namespace RetailSystem.API.Controllers
 
         // POST api/products
         [HttpPost]
+
         public async Task<IActionResult> CreateAsync(CreateProductDTO model)
         {
             if (!ModelState.IsValid)

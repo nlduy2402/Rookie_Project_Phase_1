@@ -256,6 +256,9 @@
         background: linear-gradient(90deg, #0d6efd, #6f42c1);
     }
 
+    .auto-dismiss {
+        transition: opacity 0.5s ease;
+    }
     .toast-msg {
         position: fixed;
         top: 20px;
@@ -283,16 +286,11 @@
  </style>
 <script>
     setTimeout(() => {
-        let alert = document.getElementById("alertBox");
-        if (alert) {
-            alert.classList.remove("show"); // fade out
-            alert.classList.add("fade");
-
-            setTimeout(() => {
-                alert.remove();
-            }, 500);
-        }
-    }, 3000); 
+        document.querySelectorAll(".auto-dismiss").forEach(alert => {
+            alert.classList.remove("show");
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 3000);
 
     async function handleRating(orderId, productId) {
 

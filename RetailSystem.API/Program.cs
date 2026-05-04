@@ -13,6 +13,7 @@ using Serilog.Events;
 using RetailSystem.API.Shared;
 using RetailSystem.Infrastructure.Repository.Interface;
 using RetailSystem.Infrastructure.Repository;
+using RetailSystem.Shared.Settings;
 
 // Use Serilog for logging
 Log.Logger = new LoggerConfiguration()
@@ -63,7 +64,7 @@ try
             )
         };
     });
-
+    builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
     builder.Services.AddAuthorization();
     builder.Services.AddMemoryCache();
 
@@ -72,6 +73,7 @@ try
     builder.Services.AddScoped<ICategoryService, CategoryService>();
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<IAdminService, AdminService>();
+    builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 
     builder.Services.AddCors(options => {
