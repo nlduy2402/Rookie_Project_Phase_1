@@ -69,7 +69,7 @@ namespace RetailSystem.API.Controllers
 
             if (!result.IsSuccess)
             {
-                return NotFound(result.Message); // 404
+                return NotFound(new { message = result.Message });
             }
 
             return OkResponse(id,result.Message);

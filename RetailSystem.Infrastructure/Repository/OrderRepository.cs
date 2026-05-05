@@ -20,22 +20,22 @@ namespace RetailSystem.Infrastructure.Repository
         }
         public async Task<(IEnumerable<Order>, int totalCount)> GetUserOrdersPagedAsync(
         string userId, int page, int pageSize)
-            {
-                var query = _context.Orders
-                    .Where(o => o.UserId == userId)
-                    .OrderByDescending(o => o.OrderDate)
-                    .AsQueryable();
+        {
+            var query = _context.Orders
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .AsQueryable();
 
-                var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync();
 
-                var items = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Include(o => o.OrderDetails).ThenInclude(od => od.Product)
-                    .ToListAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Include(o => o.OrderDetails).ThenInclude(od => od.Product)
+                .ToListAsync();
 
-                return (items, totalCount);
-            }
+            return (items, totalCount);
+        }
         public async Task<Order?> GetOrderWithDetailsAsync(int orderId)
         {
             return await _context.Orders
@@ -60,6 +60,32 @@ namespace RetailSystem.Infrastructure.Repository
                     .ThenInclude(od => od.Product)
                 .OrderByDescending(o => o.OrderDate)
                 .ToPagedAsync(page, pageSize);
+        }
+
+        public async Task<PageResult<Order>> GetAllOrdersPagedAsync(int page, int pageSize)
+        {
+            var query = _context.Orders
+                    .Include(o => o.User)          
+                    .Include(o => o.OrderDetails)
+                    .ThenInclude(d => d.Product)
+                    .ThenInclude(p => p.Images)
+                    .OrderByDescending(o => o.OrderDate)
+                    .AsNoTracking();                
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PageResult<Order>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
     }
 }

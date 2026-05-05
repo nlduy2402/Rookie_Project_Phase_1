@@ -64,6 +64,12 @@ try
             )
         };
     });
+    builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Ignore circular references to prevent serialization issues
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
     builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
     builder.Services.AddAuthorization();
     builder.Services.AddMemoryCache();
@@ -74,6 +80,7 @@ try
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<IAdminService, AdminService>();
     builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+    builder.Services.AddScoped<IOrderService, OrderService>();
 
 
     builder.Services.AddCors(options => {

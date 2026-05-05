@@ -153,12 +153,12 @@
                                 @* CANCEL: chỉ Pending + Processing *@
                                 @if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Processing)
                                 {
-                                    <form asp-action="Ship" method="post" asp-route-id="@order.Id">
-                                        @Html.AntiForgeryToken()
-                                        <button class="btn btn-outline-info btn-sm rounded-pill">
-                                            Shipped
-                                        </button>
-                                    </form>
+                                    // <form asp-action="Ship" method="post" asp-route-id="@order.Id">
+                                    //     @Html.AntiForgeryToken()
+                                    //     <button class="btn btn-outline-info btn-sm rounded-pill">
+                                    //         Shipped
+                                    //     </button>
+                                    // </form>
                                     <form asp-action="Cancel" method="post" asp-route-id="@order.Id">
                                         @Html.AntiForgeryToken()
                                         <button class="btn btn-outline-danger btn-sm rounded-pill">

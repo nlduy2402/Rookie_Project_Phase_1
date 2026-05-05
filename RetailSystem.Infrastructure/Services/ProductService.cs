@@ -17,6 +17,7 @@ using Microsoft.Identity.Client;
 using RetailSystem.Domain.Repository.Interface;
 using RetailSystem.Shared.ResponseModels;
 using RetailSystem.Shared.ViewModels;
+using Microsoft.Data.SqlClient;
 
 namespace RetailSystem.Infrastructure.Services
 {
@@ -202,14 +203,31 @@ namespace RetailSystem.Infrastructure.Services
         public async Task<ServiceResult<bool>> DeleteAsync(int id)
         {
             var product = await _uow.Products.GetByIdAsync(id);
-            if (product == null) return new ServiceResult<bool> { IsSuccess = false };
+            if (product == null) return new ServiceResult<bool> { IsSuccess = false,Message="Product do not exist!" };
 
-            _uow.Products.Delete(product);
-            await _uow.SaveChangesAsync();
+            try {
+                _uow.Products.Delete(product);
+                await _uow.SaveChangesAsync();
 
-            _cache.Remove(ProductCacheKey);
+                _cache.Remove(ProductCacheKey);
+                return new ServiceResult<bool> { IsSuccess = true, Message="Product Deleted !" };
+            }
+            catch(DbUpdateException ex)
+            {
+                if (ex.InnerException is SqlException sqlEx && (sqlEx.Number == 547))
+                {
+                    return new ServiceResult<bool> {IsSuccess=false, Message="Can not delete this product because it is exist in orders." };
+                }
 
-            return new ServiceResult<bool> { IsSuccess = true };
+                return new ServiceResult<bool> { IsSuccess = false, Message = "Error occured while update data" };
+            }
+            
+            //_uow.Products.Delete(product);
+            //await _uow.SaveChangesAsync();
+
+            //_cache.Remove(ProductCacheKey);
+
+            //return new ServiceResult<bool> { IsSuccess = true };
         }
 
         public async Task<ServiceResult<PageResult<Product>>> GetPagedAsync(int page, int pageSize)

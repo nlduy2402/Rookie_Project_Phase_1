@@ -29,7 +29,6 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<Order> CreateOrderAsync(string userId, OrderDTO orderDto, string PaymentMethod)
         {
-            // 1. Lấy giỏ hàng
             var cart = await _uow.Carts.GetCartByUserIdAsync(userId);
             if (cart == null || !cart.Items.Any()) throw new Exception("Empty Cart");
 
@@ -46,8 +45,13 @@ namespace RetailSystem.Infrastructure.Services
                     TotalAmount = cart.Items.Sum(x => x.Quantity * x.Product.Price),
                     PaymentMethod = PaymentMethod,
                     PaymentStatus = PaymentStatus.Pending,
+                    
                     TxnRef = Guid.NewGuid().ToString("N")
                 };
+                if(PaymentMethod == "COD")
+                {
+                    order.Status = OrderStatus.Processing; // Chuyển trạng thái ngay nếu đã thanh toán
+                }
 
                 // 3. Chuyển CartItem sang OrderDetail và trừ kho
                 foreach (var item in cart.Items)
@@ -176,33 +180,60 @@ namespace RetailSystem.Infrastructure.Services
 
             return order;
         }
-        public async Task ShipOrderAsync(int orderId, string userId)
+        //public async Task ShipOrderAsync(int orderId, string userId)
+        //{
+        //    var order = await _uow.Orders.GetByIdAsync(orderId);
+
+        //    if (order == null)
+        //        throw new Exception("Order not found");
+
+        //    if (order.UserId != userId)
+        //        throw new Exception("Unauthorized");
+
+        //    if (order.Status != OrderStatus.Processing && order.Status != OrderStatus.Pending)
+        //        throw new Exception("Order not ready to ship");
+
+        //    await _uow.BeginTransactionAsync();
+
+        //    try
+        //    {
+        //        order.Status = OrderStatus.Shipped;
+
+        //        await _uow.SaveChangesAsync();
+        //        await _uow.CommitTransactionAsync();
+        //    }
+        //    catch
+        //    {
+        //        await _uow.RollbackTransactionAsync();
+        //        throw;
+        //    }
+        //}
+
+        public async Task<ServiceResult<string>> ShipOrderAsync(int orderId)
         {
             var order = await _uow.Orders.GetByIdAsync(orderId);
-
             if (order == null)
                 throw new Exception("Order not found");
-
-            if (order.UserId != userId)
-                throw new Exception("Unauthorized");
-
             if (order.Status != OrderStatus.Processing && order.Status != OrderStatus.Pending)
                 throw new Exception("Order not ready to ship");
-
             await _uow.BeginTransactionAsync();
-
             try
             {
                 order.Status = OrderStatus.Shipped;
-
                 await _uow.SaveChangesAsync();
                 await _uow.CommitTransactionAsync();
+                return new ServiceResult<string>
+                {
+                    IsSuccess = true,
+                    Data = "Order shipped successfully"
+                };
             }
             catch
             {
                 await _uow.RollbackTransactionAsync();
-                throw;
+                throw new Exception("Fail to ship this order.");
             }
+
         }
 
         public async Task CompleteOrderAsync(int orderId, string userId)
@@ -223,6 +254,7 @@ namespace RetailSystem.Infrastructure.Services
             try
             {
                 order.Status = OrderStatus.Completed;
+                order.PaymentStatus = PaymentStatus.Paid;
 
                 await _uow.SaveChangesAsync();
                 await _uow.CommitTransactionAsync();
@@ -232,6 +264,16 @@ namespace RetailSystem.Infrastructure.Services
                 await _uow.RollbackTransactionAsync();
                 throw;
             }
+        }
+
+        public async Task<ServiceResult<PageResult<Order>>> GetAllOrdersPagedAsync(int page, int pageSize)
+        {
+            var result = await _uow.Orders.GetAllOrdersPagedAsync(page, pageSize);
+            return new ServiceResult<PageResult<Order>>
+            {
+                IsSuccess = true,
+                Data = result
+            };
         }
     } 
 }

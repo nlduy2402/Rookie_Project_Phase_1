@@ -17,5 +17,7 @@ namespace RetailSystem.Infrastructure.Repository.Interface
         //Task<IEnumerable<Order>> GetOrderHistoryByUserIdAsync(string userId);
         Task<PageResult<Order>> GetOrderHistoryByUserIdAsync(string userId, int page, int pageSize);
 
+        Task<PageResult<Order>> GetAllOrdersPagedAsync(int page, int pageSize);
+
     }
 }
