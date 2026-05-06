@@ -27,5 +27,6 @@ namespace RetailSystem.Shared.ViewModels
 
         // Gộp sẵn cho UI
         public List<string> Specs { get; set; } = new();
+        public int TotalSold { get; set; }
     }
 }

@@ -18,6 +18,7 @@ using RetailSystem.Domain.Repository.Interface;
 using RetailSystem.Shared.ResponseModels;
 using RetailSystem.Shared.ViewModels;
 using Microsoft.Data.SqlClient;
+using RetailSystem.Infrastructure.Repository;
 
 namespace RetailSystem.Infrastructure.Services
 {
@@ -245,6 +246,51 @@ namespace RetailSystem.Infrastructure.Services
                 }
             };
         
+        }
+
+        public async Task<ServiceResult<IEnumerable<ProductViewModel>>> GetTopSellingProductCardsAsync(int top)
+        {
+            try
+            {
+                // 1. Lấy danh sách TopProductDto từ Repository (chỉ gồm ID và TotalSold)
+                var topSellingDtos = await _uow.Products.GetTopSellingProductsAsync(top, 4);
+                var productIds = topSellingDtos.Select(d => d.ProductId).ToList();
+
+                // 2. Lấy thông tin chi tiết Product Entity từ Repo 
+                // Dùng Include để lấy đầy đủ Images và Category cho hàm ToCardVM
+                var products = await _uow.Products.GetAllAsync(
+                    p => productIds.Contains(p.Id),
+                    includeProperties: "Images,Category"
+                );
+
+                // 3. Map và trộn dữ liệu
+                var viewModels = topSellingDtos.Select(dto =>
+                {
+                    var p = products.FirstOrDefault(x => x.Id == dto.ProductId); 
+                    if (products == null) return null;
+
+                    var vm = p.ToCardVM();
+
+                    vm.TotalSold = dto.TotalSold;
+
+                    return vm;
+                }).Where(x => x != null).ToList();
+
+                return new ServiceResult<IEnumerable<ProductViewModel>>
+                {
+                    IsSuccess = true,
+                    Data = viewModels
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching top selling products");
+                return new ServiceResult<IEnumerable<ProductViewModel>>
+                {
+                    IsSuccess = false,
+                    Message = "An error occurred while fetching top selling products."
+                };
+            }
         }
     }
 }

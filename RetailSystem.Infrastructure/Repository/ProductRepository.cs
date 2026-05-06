@@ -2,6 +2,7 @@
 using RetailSystem.Domain.Entities;
 using RetailSystem.Infrastructure.Persistence;
 using RetailSystem.Infrastructure.Repository.Interface;
+using RetailSystem.Shared.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,14 @@ namespace RetailSystem.Infrastructure.Repository
                 .ToListAsync();
 
             return (items, totalCount);
+        }
+
+        public async Task<IEnumerable<TopProductDTO>> GetTopSellingProductsAsync(int topCount, int status)
+        {
+            // Gọi Stored Procedure thông qua DbContext
+            return await _context.Database
+                .SqlQueryRaw<TopProductDTO>("EXEC USP_GetTopSellingProducts @TopCount={0}, @OrderStatus={1}", topCount, status)
+                .ToListAsync();
         }
     }
 }

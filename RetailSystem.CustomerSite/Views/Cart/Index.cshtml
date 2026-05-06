@@ -2,151 +2,555 @@
 @model Cart
 
 <style>
-        .table td, .table th {
-        vertical-align: middle;
+    body {
+        background-color: #f5f7fb; 
+    }
+    .cart-wrap {
+        padding: 1.5rem 0;
     }
 
-    input[type="number"] {
-        max-width: 70px;
+    .cart-header {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .cart-count {
+        background: #f1f0e8;
+        border: 1px solid #e0ddd0;
+        border-radius: 20px;
+        font-size: 13px;
+        padding: 2px 12px;
+        color: #666;
+        font-weight: 400;
+    }
+
+    .cart-item {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 10px;
+        display: grid;
+        grid-template-columns: 1fr 130px 160px 110px 40px;
+        align-items: center;
+        gap: 1rem;
+        transition: border-color 0.15s;
+    }
+
+        .cart-item:hover {
+            border-color: #ccc;
+        }
+
+    .item-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 3px;
+    }
+
+    .item-stock {
+        font-size: 12px;
+        color: #888;
+    }
+
+        .item-stock.low {
+            color: #d97706;
+        }
+
+        .item-stock.out {
+            color: #dc2626;
+        }
+
+    .qty-warning {
+        font-size: 11px;
+        color: #d97706;
+        margin-top: 3px;
+        display: none;
+    }
+
+        .qty-warning.show {
+            display: block;
+        }
+
+    .item-price {
+        font-size: 14px;
+        color: #666;
+        white-space: nowrap;
+    }
+
+    .qty-ctrl {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .qty-btn {
+        width: 30px;
+        height: 30px;
+        border: 1px solid #d1d1d1;
+        border-radius: 8px;
+        background: #fff;
+        color: #1a1a1a;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.1s, border-color 0.1s;
+        user-select: none;
+        line-height: 1;
+    }
+
+        .qty-btn:hover:not(:disabled) {
+            background: #f5f5f5;
+            border-color: #999;
+        }
+
+        .qty-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+    .qty-display {
+        min-width: 32px;
+        text-align: center;
+        font-size: 15px;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .item-total {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1a1a1a;
+        white-space: nowrap;
+        text-align: right;
+    }
+
+    .item-remove {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #bbb;
+        font-size: 18px;
+        padding: 4px;
+        border-radius: 8px;
+        transition: color 0.15s, background 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .item-remove:hover {
+            color: #dc2626;
+            background: #fef2f2;
+        }
+
+    .cart-divider {
+        height: 1px;
+        background: #e8e8e8;
+        margin: 1.25rem 0;
+    }
+
+    .footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .clear-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #888;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 0;
+        transition: color 0.15s;
+        text-decoration: none;
+    }
+
+        .clear-btn:hover {
+            color: #dc2626;
+        }
+
+    .checkout-side {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .total-block {
+        text-align: right;
+    }
+
+    .total-label {
+        font-size: 12px;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 2px;
+    }
+
+    .total-amount {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+
+    .checkout-btn {
+        background: #1a1a1a;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 11px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.15s;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+        .checkout-btn:hover {
+            opacity: 0.82;
+            color: #fff;
+        }
+
+    .toast-cart {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1a1a1a;
+        color: #fff;
+        border-radius: 8px;
+        padding: 9px 18px;
+        font-size: 13px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 9999;
+        white-space: nowrap;
+    }
+
+        .toast-cart.show {
+            opacity: 1;
+        }
+
+    .cart-empty {
+        text-align: center;
+        padding: 4rem 0;
+        color: #aaa;
+    }
+
+        .cart-empty svg {
+            display: block;
+            margin: 0 auto 16px;
+            opacity: 0.35;
+        }
+
+        .cart-empty p {
+            font-size: 16px;
+            margin-bottom: 1rem;
+        }
+
+        .cart-empty a {
+            font-size: 14px;
+            color: #1a1a1a;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 8px 20px;
+            text-decoration: none;
+            display: inline-block;
+            transition: border-color 0.15s;
+        }
+
+            .cart-empty a:hover {
+                border-color: #1a1a1a;
+            }
+
+    @@media (max-width: 640px) {
+        .cart-item {
+            grid-template-columns: 1fr auto;
+            grid-template-rows: auto auto auto;
+        }
+
+        .item-price {
+            display: none;
+        }
+
+        .qty-ctrl {
+            grid-column: 1;
+        }
+
+        .item-total {
+            grid-column: 1;
+        }
+
+        .item-remove {
+            grid-row: 1;
+            grid-column: 2;
+        }
     }
 </style>
-@if (TempData["StockErrors"] != null)
-{
-    var errors = TempData["StockErrors"] as IEnumerable<string>;
-    <div id="stock-alert" class="alert alert-warning alert-dismissible fade show shadow-sm border-start border-4 border-warning" role="alert">
-        <div class="d-flex">
-            <i class="bi bi-exclamation-circle-fill fs-4 me-2"></i>
-            <div>
-                <strong class="d-block mb-1">Failed Payment!</strong>
-                <ul class="mb-0 small">
-                    @foreach (var error in errors)
-                    {
-                        <li>@error</li>
-                    }
-                </ul>
-            </div>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-<div class="container my-5">
-    <h3 class="mb-4">Shopping Cart</h3>
+
+<div class="cart-wrap container">
 
     @if (Model == null || !Model.Items.Any())
     {
-        <div class="alert alert-info">
-            Your cart is empty
+        <div class="cart-empty">
+            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+            </svg>
+            <p>Your Cart is Empty</p>
+            <a asp-controller="Product" asp-action="Index">Shopping Now</a>
         </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Product</th>
-                        <th width="120">Price</th>
-                        <th width="150">Quantity</th>
-                        <th width="120">Total</th>
-                        <th width="100"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.Items)
-                    {
-                        <tr>
-                            <!-- Product -->
-                            <td>
-                                <strong>@item.Product.Name (Remaining:@item.Product.Quantity)</strong>
-                            </td>
-
-                            <!-- Price -->
-                            <td>
-                                @item.Product.Price.ToString("N0") đ
-                            </td>
-
-                            <!-- Quantity -->
-                            <td>
-                                <form asp-action="Update" method="post" class="d-flex">
-                                    <input type="hidden" name="productId" value="@item.ProductId" />
-
-                                    <input type="number"
-                                           name="quantity"
-                                           value="@item.Quantity"
-                                           min="1"
-                                           class="form-control me-2" />
-
-                                    <button class="btn btn-outline-primary btn-sm">
-                                        Update
-                                    </button>
-                                </form>
-                            </td>
-
-                            <!-- Total -->
-                            <td>
-                                @((item.Quantity * item.Product.Price).ToString("N0")) đ
-                            </td>
-
-                            <!-- Remove -->
-                            <td>
-                                <form asp-action="Remove" method="post">
-                                    <input type="hidden" name="productId" value="@item.ProductId" />
-                                    <button class="btn btn-outline-danger btn-sm">
-                                        ✕
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="cart-header">
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+            </svg>
+            Cart
+            <span class="cart-count">@Model.Items.Sum(i => i.Quantity) products</span>
         </div>
 
-        <!-- TOTAL + ACTION -->
-        <div class="card shadow-sm border-0 mt-4">
-            <div class="card-body p-4">
-                <div class="row align-items-center">
-                    <!-- Phần bên trái: Nút xóa giỏ hàng -->
-                    <div class="col-md-4 order-2 order-md-1 mt-3 mt-md-0">
-                        <form asp-action="Clear" asp-controller="Cart" method="post"
-                              onsubmit="return confirm('Are you sure to delete all item in your cart?')">
-                            <button class="btn btn-link text-danger text-decoration-none p-0">
-                                <i class="bi bi-trash3 me-1"></i> Clear Cart
-                            </button>
-                        </form>
-                    </div>
+        <div id="cart-list">
+            @foreach (var item in Model.Items)
+            {
+                var stock = item.Product.Quantity;
+                var isLow = stock <= 3 && stock > 0;
+                var isMax = item.Quantity >= stock;
+                var stockClass = stock == 0 ? "out" : isLow ? "low" : "";
+                var stockLabel = stock == 0 ? "Out of Stock" : $"Remaining: {stock}";
 
-                    <div class="col-md-8 order-1 order-md-2 text-md-end">
-                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-end gap-4">
-                            <div class="mb-2 mb-md-0">
-                                <span class="text-muted text-uppercase small fw-bold">Total:</span>
-                                <h3 class="text-primary mb-0 fw-bold">
-                                    @Model.Items.Sum(i => i.Quantity * i.Product!.Price).ToString("N0") <span class="fs-6">₫</span>
-                                </h3>
-                            </div>
-
-                            <a asp-action="index" asp-controller="Order"
-                               class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-sm fw-bold">
-                                Checkout Now <i class="bi bi-arrow-right ms-2"></i>
-                            </a>
+                <div class="cart-item" id="cart-item-@item.ProductId">
+                    <!-- Tên & tồn kho -->
+                    <div>
+                        <div class="item-name">@item.Product.Name</div>
+                        <div class="item-stock @stockClass">@stockLabel</div>
+                        <div class="qty-warning @(isMax ? "show" : "")" id="warn-@item.ProductId">
+                            You have got the maximum available stock for this product.
                         </div>
                     </div>
+
+                    <!-- Đơn giá -->
+                    <div class="item-price">@item.Product.Price.ToString("N0") ₫</div>
+
+                    <!-- Số lượng -->
+                    <div class="qty-ctrl">
+                        <button class="qty-btn"
+                                onclick="changeQty(@item.ProductId, -1, @stock)"
+                                aria-label="Decrease Quantity">
+                            −
+                        </button>
+                        <span class="qty-display" id="qty-@item.ProductId">@item.Quantity</span>
+                        <button class="qty-btn"
+                                id="btn-plus-@item.ProductId"
+                                onclick="changeQty(@item.ProductId, 1, @stock)"
+                        @(isMax ? "disabled" : "")
+                                aria-label="Increase Quantity">
+                            +
+                        </button>
+                    </div>
+
+                    <!-- Thành tiền -->
+                    <div class="item-total" id="line-@item.ProductId">
+                        @((item.Quantity * item.Product.Price).ToString("N0")) ₫
+                    </div>
+
+                    <!-- Xóa -->
+                    <form asp-action="Remove" method="post" style="display:inline">
+                        <input type="hidden" name="productId" value="@item.ProductId" />
+                        <button type="submit" class="item-remove" aria-label="Remove Product">
+                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </form>
                 </div>
+            }
+        </div>
+
+        <div class="cart-divider"></div>
+
+        <div class="footer-row">
+            <!-- Xóa tất cả -->
+            <form asp-action="Clear" asp-controller="Cart" method="post"
+                  onsubmit="return confirm('Delete your cart?')">
+                <button type="submit" class="clear-btn">
+                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                    Clear Cart
+                </button>
+            </form>
+
+            <!-- Total + Checkout -->
+            <div class="checkout-side">
+                <div class="total-block">
+                    <div class="total-label">Total</div>
+                    <div class="total-amount" id="grand-total">
+                        @Model.Items.Sum(i => i.Quantity * i.Product!.Price).ToString("N0") ₫
+                    </div>
+                </div>
+                <a asp-action="Index" asp-controller="Order" class="checkout-btn">
+                    CHECKOUT NOW
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                    </svg>
+                </a>
             </div>
         </div>
     }
 </div>
-@section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const alert = document.getElementById('stock-alert');
-            if (alert) {
-                setTimeout(function() {
-                    alert.classList.remove('show');
 
-                    setTimeout(() => alert.remove(), 150);
-                }, 4000);
+<div class="toast-cart" id="cartToast"></div>
+
+<script>
+    const prices = {
+        @foreach (var item in Model?.Items ?? Enumerable.Empty<dynamic>())
+        {
+            @:@item.ProductId: @item.Product.Price,
+        }
+    };
+
+    const quantities = {
+    @foreach (var item in Model?.Items ?? Enumerable.Empty<dynamic>())
+        {
+            @:@item.ProductId: @item.Quantity,
+        }
+    };
+
+    function showToast(msg) {
+        const el = document.getElementById('cartToast');
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(el._timer);
+        el._timer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function fmtVND(n) {
+        return n.toLocaleString('vi-VN') + ' ₫';
+    }
+
+    function recalcTotal() {
+        let total = 0;
+        for (const [id, qty] of Object.entries(quantities)) {
+            total += (prices[id] || 0) * qty;
+        }
+        document.getElementById('grand-total').textContent = fmtVND(total);
+    }
+
+    function changeQty(productId, delta, stock) {
+        const current = quantities[productId] || 1;
+        const next = current + delta;
+
+        // Xóa sản phẩm nếu giảm xuống 0
+        if (next < 1) {
+            if (confirm('Remove this product from your Cart?')) {
+                submitRemove(productId);
             }
-        });
-    </script>
-}
+            return;
+        }
+
+        // Kiểm tra tồn kho
+        if (next > stock) {
+            showToast('You Got Maximum in Stock');
+            return;
+        }
+
+        quantities[productId] = next;
+
+        document.getElementById('qty-' + productId).textContent = next;
+        document.getElementById('line-' + productId).textContent = fmtVND(prices[productId] * next);
+
+        const plusBtn = document.getElementById('btn-plus-' + productId);
+        const warn = document.getElementById('warn-' + productId);
+        if (next >= stock) {
+            plusBtn.disabled = true;
+            warn.classList.add('show');
+        } else {
+            plusBtn.disabled = false;
+            warn.classList.remove('show');
+        }
+
+        recalcTotal();
+
+        // Gửi lên server (debounce 600ms)
+        clearTimeout(window['debounce_' + productId]);
+        window['debounce_' + productId] = setTimeout(() => {
+            submitUpdate(productId, next);
+        }, 600);
+    }
+
+    function submitUpdate(productId, quantity) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '@Url.Action("Update", "Cart")';
+
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '__RequestVerificationToken';
+        tokenInput.value = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        form.appendChild(tokenInput);
+
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'productId';
+        idInput.value = productId;
+        form.appendChild(idInput);
+
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'hidden';
+        qtyInput.name = 'quantity';
+        qtyInput.value = quantity;
+        form.appendChild(qtyInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function submitRemove(productId) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '@Url.Action("Remove", "Cart")';
+
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '__RequestVerificationToken';
+        tokenInput.value = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        form.appendChild(tokenInput);
+
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'productId';
+        idInput.value = productId;
+        form.appendChild(idInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+
+@* Anti-forgery token cho JS form submit *@
+@Html.AntiForgeryToken()

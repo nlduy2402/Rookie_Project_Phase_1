@@ -1,0 +1,159 @@
+﻿@using RetailSystem.Shared.ViewModels
+@model IEnumerable<ProductViewModel>
+
+<style>
+    .laptop-card {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+        transition: 0.3s;
+    }
+
+        .laptop-card:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        /* IMAGE */
+        .laptop-card .product-image {
+            background: #f5f5f5;
+            padding: 10px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .laptop-card .product-image img {
+                max-height: 100%;
+                max-width: 100%;
+                object-fit: contain;
+            }
+
+        .laptop-card img {
+            max-height: 180px;
+            object-fit: contain;
+        }
+
+        /* TITLE */
+        .laptop-card .title {
+            font-size: 15px;
+            font-weight: 600;
+            min-height: 45px;
+        }
+
+        /* SPECS BOX */
+        .laptop-card .specs {
+            background: #f1f1f1;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+        }
+
+            .laptop-card .specs i {
+                font-size: 14px;
+                color: #666;
+                margin-right: 4px;
+            }
+
+            .laptop-card .specs div {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+        /* PRICE */
+        .laptop-card .new-price {
+            color: red;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* RATING */
+        .laptop-card .rating {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+    .sold-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: rgba(255, 61, 0, 0.85); /* Màu cam đỏ đậm chất Retail */
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        /* Icon ngọn lửa nhỏ cho sinh động */
+        .sold-badge i {
+            font-size: 14px;
+        }
+
+    /* Hiệu ứng khi hover vào card thì badge nổi hơn */
+    .single-product:hover .sold-badge {
+        background-color: #ff3d00;
+        transform: scale(1.05);
+        transition: all 0.3s ease;
+    }
+</style>
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-lg-3 col-md-6 col-12">
+            <!-- Start Single Product -->
+            <div class="single-product laptop-card">
+                <div class="product-image text-center">
+                    <img src="@item.ImageUrl" alt="Laptop">
+                    @if (item.TotalSold > 0)
+                    {
+                        <span class="sold-badge"><i class="bi bi-fire"></i> Sold: @item.TotalSold</span>
+                    }
+                    <div class="button">
+                        <button onclick="addToCart(@item.Id)" class="btn">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div class="product-info">
+                    <!-- Title -->
+                    <h4 class="title">
+                        <a asp-controller="Product"
+                           asp-action="Detail"
+                           asp-route-id="@item.Id">
+                            @item.Name
+                        </a>
+                    </h4>
+
+                    <!-- Specs -->
+                    <div class="specs">
+                        <div><i class="bi bi-cpu"></i> @item.ChipSet </div>
+                        <div><i class="bi bi-memory"></i> @item.RAM</div>
+                        <div><i class="bi bi-hdd"></i> @item.SSD</div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="price">
+                        <span class="new-price">@item.PriceFormatted </span>
+                    </div>
+
+
+                </div>
+            </div>
+            <!-- End Single Product -->
+        </div>
+    }
+</div>

@@ -20,6 +20,7 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
         new Task<ServiceResult<bool>> DeleteAsync(int id);
         Task<ServiceResult<PageResult<Product>>> GetPagedAsync(int page, int pageSize);
         Task<ServiceResult<ProductDetailViewModel>> GetProductByIdWithReviewAsync(int id);
+        Task<ServiceResult<IEnumerable<ProductViewModel>>> GetTopSellingProductCardsAsync(int top);
 
     }
 }

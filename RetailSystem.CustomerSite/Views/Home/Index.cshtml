@@ -23,85 +23,6 @@
     <link rel="stylesheet" href="assets/css/glightbox.min.css" />
     <link rel="stylesheet" href="assets/css/main.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-    <style>
-        .laptop-card {
-            border: 1px solid #eee;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #fff;
-            transition: 0.3s;
-        }
-
-        .laptop-card:hover {
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        /* IMAGE */
-        .laptop-card .product-image {
-            background: #f5f5f5;
-            padding: 10px;
-            height: 220px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .laptop-card .product-image img {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: contain;
-        } 
-        .laptop-card img {
-        max-height: 180px;
-        object-fit: contain;
-        }
-
-        /* TITLE */
-        .laptop-card .title {
-        font-size: 15px;
-        font-weight: 600;
-        min-height: 45px;
-        }
-
-        /* SPECS BOX */
-        .laptop-card .specs {
-        background: #f1f1f1;
-        border-radius: 10px;
-        padding: 10px;
-        margin: 10px 0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px 12px;
-        }
-
-        .laptop-card .specs i {
-        font-size: 14px;
-        color: #666;
-        margin-right: 4px;
-        }
-
-        .laptop-card .specs div {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        white-space: normal; 
-        word-break: break-word; 
-        }
-
-        /* PRICE */
-        .laptop-card .new-price {
-        color: red;
-        font-size: 18px;
-        font-weight: bold;
-        }
-
-        /* RATING */
-        .laptop-card .rating {
-        font-size: 14px;
-        margin-top: 5px;
-        }
-    </style>
 </head>
 
 <body>
@@ -175,51 +96,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                @foreach(var item in Model)
-                {
-                    <div class="col-lg-3 col-md-6 col-12">
-                        <!-- Start Single Product -->
-                        <div class="single-product laptop-card">
-                            <div class="product-image text-center">
-                                <img src="@item.ImageUrl" alt="Laptop">
-
-                                <div class="button">
-                                    <button onclick="addToCart(@item.Id)" class="btn">
-                                        Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="product-info">
-                                <!-- Title -->
-                                <h4 class="title">
-                                    <a asp-controller="Product"
-                                       asp-action="Detail"
-                                       asp-route-id="@item.Id">
-                                        @item.Name
-                                    </a>
-                                </h4>
-
-                                <!-- Specs -->
-                                <div class="specs">
-                                    <div><i class="bi bi-cpu"></i> @item.ChipSet </div>
-                                    <div><i class="bi bi-memory"></i> @item.RAM</div>
-                                    <div><i class="bi bi-hdd"></i> @item.SSD</div>
-                                </div>
-
-                                <!-- Price -->
-                                <div class="price">
-                                    <span class="new-price">@item.PriceFormatted </span>
-                                </div>
-
-
-                            </div>
-                        </div>
-                        <!-- End Single Product -->
-                    </div>
-                }
-            </div>
+            @await Component.InvokeAsync("TopSellingProducts", 4)
         </div>
     </section>
     <!-- End Trending Product Area -->
