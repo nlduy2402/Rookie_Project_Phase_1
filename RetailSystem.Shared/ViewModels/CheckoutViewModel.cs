@@ -12,7 +12,7 @@ namespace RetailSystem.Shared.ViewModels
     {
         public OrderDTO OrderData { get; set; } = new();
         public List<CartItem> CartItems { get; set; } = new();
-        public string PaymentMethod { get; set; } = "COD"; 
+        public string PaymentMethod { get; set; } = "COD";
         public List<string> StockErrors { get; set; } = new();
         public bool HasStockError => StockErrors.Any();
     }

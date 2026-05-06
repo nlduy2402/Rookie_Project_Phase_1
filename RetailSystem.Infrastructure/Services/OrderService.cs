@@ -50,7 +50,7 @@ namespace RetailSystem.Infrastructure.Services
                 };
                 if(PaymentMethod == "COD")
                 {
-                    order.Status = OrderStatus.Processing; // Chuyển trạng thái ngay nếu đã thanh toán
+                    order.Status = OrderStatus.Processing;
                 }
 
                 // 3. Chuyển CartItem sang OrderDetail và trừ kho

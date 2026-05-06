@@ -484,3 +484,5 @@ $RECYCLE.BIN/
 *.swp
 /RetailSystem.API/appsettings.Development.json
 /RetailSystem.CustomerSite/appsettings.Development.json
+/RetailSystem.API/appsettings.Development.json
+/RetailSystem.CustomerSite/appsettings.Development.json

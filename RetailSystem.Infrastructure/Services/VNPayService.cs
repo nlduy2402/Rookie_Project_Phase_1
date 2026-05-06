@@ -34,7 +34,7 @@ namespace RetailSystem.Infrastructure.Services
             vnp.Add("vnp_Command", "pay");
             vnp.Add("vnp_TmnCode", _config["VNPay:TmnCode"]);
 
-            vnp.Add("vnp_Amount", ((int)(order.TotalAmount * 100)).ToString());
+            vnp.Add("vnp_Amount", ((long)(order.TotalAmount * 100)).ToString());
             vnp.Add("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
             vnp.Add("vnp_CurrCode", "VND");
             vnp.Add("vnp_IpAddr", "127.0.0.1");
@@ -46,10 +46,8 @@ namespace RetailSystem.Infrastructure.Services
             vnp.Add("vnp_ReturnUrl", _config["VNPay:ReturnUrl"]);
             vnp.Add("vnp_TxnRef", order.TxnRef);
 
-            // 👉 VNPay yêu cầu có param này
             vnp.Add("vnp_SecureHashType", "HmacSHA512");
 
-            // 🔥 Build query + signData giống hệt nhau (đây là KEY FIX)
             var queryBuilder = new StringBuilder();
             var hashDataBuilder = new StringBuilder();
 

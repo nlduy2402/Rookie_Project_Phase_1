@@ -10,6 +10,25 @@
         max-width: 70px;
     }
 </style>
+@if (TempData["StockErrors"] != null)
+{
+    var errors = TempData["StockErrors"] as IEnumerable<string>;
+    <div id="stock-alert" class="alert alert-warning alert-dismissible fade show shadow-sm border-start border-4 border-warning" role="alert">
+        <div class="d-flex">
+            <i class="bi bi-exclamation-circle-fill fs-4 me-2"></i>
+            <div>
+                <strong class="d-block mb-1">Failed Payment!</strong>
+                <ul class="mb-0 small">
+                    @foreach (var error in errors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 <div class="container my-5">
     <h3 class="mb-4">Shopping Cart</h3>
 
@@ -38,7 +57,7 @@
                         <tr>
                             <!-- Product -->
                             <td>
-                                <strong>@item.Product.Name</strong>
+                                <strong>@item.Product.Name (Remaining:@item.Product.Quantity)</strong>
                             </td>
 
                             <!-- Price -->
@@ -117,3 +136,17 @@
         </div>
     }
 </div>
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const alert = document.getElementById('stock-alert');
+            if (alert) {
+                setTimeout(function() {
+                    alert.classList.remove('show');
+
+                    setTimeout(() => alert.remove(), 150);
+                }, 4000);
+            }
+        });
+    </script>
+}

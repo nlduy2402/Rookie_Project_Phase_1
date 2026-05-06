@@ -33,17 +33,32 @@ namespace RetailSystem.CustomerSite.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
-            var cart = await  _cartService.GetCartAsync(userId);
+            var cart = await _cartService.GetCartAsync(userId);
 
             if (cart == null || !cart.Items.Any())
             {
                 return RedirectToAction("Index", "Cart");
             }
 
+            var stockErrors = new List<string>();
+            foreach (var item in cart.Items)
+            {
+                if (item.Quantity > item.Product?.Quantity)
+                {
+                    stockErrors.Add($"Product '{item.Product.Name}' only has {item.Product.Quantity} units in stock.");
+                }
+            }
+
+            if (stockErrors.Any())
+            {
+                TempData["StockErrors"] = stockErrors;
+                return RedirectToAction("Index", "Cart");
+            }
+
             var viewModel = new CheckoutViewModel
             {
                 CartItems = cart.Items,
-                OrderData = new OrderDTO() 
+                OrderData = new OrderDTO()
             };
 
             return View(viewModel);
@@ -58,7 +73,7 @@ namespace RetailSystem.CustomerSite.Controllers
                 var cart = await _cartService.GetCartAsync(userId);
                 model.CartItems = cart?.Items ?? new List<CartItem>();
 
-                return View("Checkout", model);
+                return View("Index", model);
             }
             try
             {
@@ -74,7 +89,6 @@ namespace RetailSystem.CustomerSite.Controllers
                     return RedirectToAction("History", "Order");
                 }
 
-                // ✅ VNPay
                 if (model.PaymentMethod == "VNPay")
                 {
                     var url = _vnPayService.CreatePaymentUrl(HttpContext, order);
@@ -85,15 +99,13 @@ namespace RetailSystem.CustomerSite.Controllers
             }
             catch (Exception ex)
             {
-                // 4. Xử lý lỗi (hết hàng, lỗi database...)
                 ModelState.AddModelError(string.Empty, "Error occured: " + ex.Message);
 
-                // Load lại dữ liệu giỏ hàng để user không thấy trang trắng
                 var userId = _userManager.GetUserId(User);
                 var cart = await _cartService.GetCartAsync(userId);
                 model.CartItems = cart?.Items ?? new List<CartItem>();
 
-                return View("Checkout", model);
+                return View("Index", model);
             }
         }
 
