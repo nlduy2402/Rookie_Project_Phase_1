@@ -12,5 +12,6 @@ namespace RetailSystem.Infrastructure.Services.Interfaces
     {
         Task<ImageUploadResult> AddPhotoAsync(IFormFile file);
         Task<List<ImageUploadResult>> AddPhotosAsync(IEnumerable<IFormFile> files);
+        Task<DeletionResult> DeletePhotoAsync(string publicId);
     }
 }

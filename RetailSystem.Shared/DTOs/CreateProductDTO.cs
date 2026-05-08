@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace RetailSystem.Shared.DTOs
 {
@@ -29,7 +30,8 @@ namespace RetailSystem.Shared.DTOs
         public string SSD { get; set; } = string.Empty;
 
         
-        public List<string> ImageUrls { get; set; } = new();
+        //public List<string> ImageUrls { get; set; } = new();
+        public List<IFormFile>? Images { get; set; }
 
         [Required]
         public int CategoryId { get; set; }

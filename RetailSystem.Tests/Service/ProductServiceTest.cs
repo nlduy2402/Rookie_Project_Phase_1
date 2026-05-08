@@ -140,7 +140,7 @@ namespace RetailSystem.Tests.Service
             var dto = new CreateProductDTO
             {
                 CategoryId = 1,
-                ImageUrls = new List<string>()
+                //ImageUrls = new List<string>()
             };
 
             //var result = await _service.CreateAsync(dto);
@@ -179,7 +179,7 @@ namespace RetailSystem.Tests.Service
             {
                 Name = "Test",
                 CategoryId = 1,
-                ImageUrls = new List<string> { "img1" }
+                //ImageUrls = new List<string> { "img1" }
             };
 
             // Act

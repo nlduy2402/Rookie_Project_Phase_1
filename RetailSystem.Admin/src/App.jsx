@@ -1,152 +1,40 @@
-import React, { useState, useEffect } from "react";
-import { Layout, Menu, Table, Form, Input, Button, Modal, Space } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, ProductOutlined } from "@ant-design/icons";
-import axios from "axios";
-import DefaultLayout from "./layout/DefaultLayout";
-import { Admin, Resource, ListGuesser, EditGuesser, ShowGuesser } from "react-admin";
-import { UserList } from "./pages/users/userList";
-import CategoryList from "./pages/categories/categoryList";
-import CategoryEdit from "./pages/categories/categoryEdit";
-import dataProvider from "./dataProvider";
-import ProductList from "./pages/products/ProductList";
-import ProductEdit from "./pages/products/ProductEdit";
-import ProductCreate from "./pages/products/ProductCreate";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import { ProductionQuantityLimitsRounded } from "@mui/icons-material";
-import { authProvider } from "./authProvider";
-import LoginPage from "./pages/auth/Login";
-// const App = () => {
-//   const [categories, setCategories] = useState([]); // Đổi users thành categories cho đúng nghĩa
-//   const [isModalVisible, setIsModalVisible] = useState(false);
-//   const [currentUser, setCurrentUser] = useState(null);
-//   const [form] = Form.useForm();
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
+import AppLayout from "./components/AppLayout.jsx";
+import Index from "./pages/Index.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import ProductsPage from "./pages/Products.jsx";
+import CategoriesPage from "./pages/Categories.jsx";
+import SettingsPage from "./pages/Settings.jsx";
+import Orders from "./pages/Order.jsx";
+import OrdersPage from "./pages/Order.jsx";
+import UsersPage from "./pages/Users.jsx";
+import LoginPage from "./pages/login/Login.jsx";
+import ProtectedRoute from "./pages/login/ProtectedRoute.jsx";
+const queryClient = new QueryClient();
 
-//   useEffect(() => {
-//     fetchCategories();
-//   }, []);
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <Toaster richColors position="top-right" />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
 
-//   useEffect(() => {
-//     if (currentUser) {
-//       form.setFieldsValue(currentUser);
-//     } else {
-//       form.resetFields();
-//     }
-//   }, [currentUser, form]);
-
-//   const fetchCategories = async () => {
-//     try {
-//       const response = await axios.get("https://localhost:7260/api/Categories");
-//       setCategories(response.data);
-//     } catch (error) {
-//       console.error("Lỗi gọi API:", error);
-//     }
-//   };
-
-//   const handleAddOrEditCategory = async (values) => {
-//     try {
-//       if (currentUser) {
-//         await axios.put(`https://localhost:7260/api/Categories/${currentUser.id}`, values);
-//       } else {
-//         await axios.post("https://localhost:7260/api/Categories", values);
-//       }
-//       setIsModalVisible(false);
-//       setCurrentUser(null);
-//       fetchCategories();
-//     } catch (error) {
-//       console.error("Lỗi lưu dữ liệu:", error);
-//     }
-//   };
-
-//   const columns = [
-//     { title: "Name", dataIndex: "name", key: "name" },
-//     { title: "Description", dataIndex: "description", key: "description" },
-//     {
-//       title: "Action",
-//       key: "action",
-//       render: (_, record) => (
-//         <Space>
-//           <Button
-//             icon={<EditOutlined />}
-//             onClick={() => {
-//               setCurrentUser(record);
-//               setIsModalVisible(true);
-//             }}>
-//             Edit
-//           </Button>
-//         </Space>
-//       ),
-//     },
-//   ];
-
-//   return (
-//     <Layout style={{ minHeight: "100vh", width: "100%" }}>
-//       <Header style={{ width: "100%" }}>
-//         <Menu
-//           theme="dark"
-//           mode="horizontal"
-//           items={[
-//             { key: "home", label: "Home" },
-//             { key: "contact", label: "Contact" },
-//           ]}
-//         />
-//       </Header>
-
-//       <Content style={{ padding: "20px", width: "100%" }}>
-//         <div style={{ background: "#fff", padding: "24px", minHeight: "280px" }}>
-//           <Space style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
-//             <Button
-//               type="primary"
-//               icon={<PlusOutlined />}
-//               onClick={() => {
-//                 setCurrentUser(null);
-//                 setIsModalVisible(true);
-//               }}>
-//               Add Category
-//             </Button>
-//           </Space>
-
-//           <Table
-//             dataSource={categories}
-//             columns={columns}
-//             rowKey="id"
-//             pagination={{ pageSize: 10 }}
-//             style={{ width: "100%" }}
-//           />
-//         </div>
-
-//         {/* Modal và Form giữ nguyên... */}
-//       </Content>
-
-//       <Footer style={{ textAlign: "center" }}>Your Company ©2026</Footer>
-//     </Layout>
-//   );
-// };
-
-// const dataProvider = {
-//   getList: async (resource) => {
-//     const res = await fetch(`https://jsonplaceholder.typicode.com/${resource}`);
-//     const data = await res.json();
-
-//     return {
-//       data: data,
-//       total: data.length, // 👈 fake total
-//     };
-//   },
-// };
-
-const App = () => {
-  return (
-    <Admin dataProvider={dataProvider} authProvider={authProvider} loginPage={LoginPage}>
-      <Resource name="categories" list={CategoryList} edit={CategoryEdit} />
-      <Resource
-        icon={ProductionQuantityLimitsRounded}
-        name="products"
-        list={ProductList}
-        edit={ProductEdit}
-        create={ProductCreate}
-      />
-    </Admin>
-  );
-};
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Index />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/users" element={<UsersPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+        </Route>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  </QueryClientProvider>
+);
 
 export default App;

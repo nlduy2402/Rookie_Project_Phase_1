@@ -54,5 +54,12 @@ namespace RetailSystem.Infrastructure.Services
 
             return results;
         }
+
+        public async Task<DeletionResult> DeletePhotoAsync(string publicId)
+        {
+            var deleteParams = new DeletionParams(publicId);
+            var result = await _cloudinary.DestroyAsync(deleteParams);
+            return result;
+        }
     }
 }

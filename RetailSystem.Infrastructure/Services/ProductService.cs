@@ -155,30 +155,25 @@ namespace RetailSystem.Infrastructure.Services
                 SSD = model.SSD,
                 ChipSet = model.ChipSet,
                 CategoryId = model.CategoryId,
-
-                Images = model.ImageUrls?.Select(url => new ProductImage
-                {
-                    Url = url
-                }).ToList() ?? new List<ProductImage>()
             };
-            //if (model.Images != null && model.Images.Any())
-            //{
-            //    Console.WriteLine($"Received {model.Images.Count} images for upload.");
-            //    foreach (var file in model.Images)
-            //    {
-            //        var uploadResult = await _cloudinaryService.AddPhotoAsync(file);
+            if (model.Images != null && model.Images.Any())
+            {
+                Console.WriteLine($"Received {model.Images.Count} images for upload.");
+                foreach (var file in model.Images)
+                {
+                    var uploadResult = await _cloudinaryService.AddPhotoAsync(file);
 
-            //        if (uploadResult.Error == null)
-            //        {
-            //            var productImage = new ProductImage
-            //            {
-            //                Url = uploadResult.SecureUrl.AbsoluteUri,
-            //                Name = file.FileName,
-            //            };
-            //            product.Images.Add(productImage);
-            //        }
-            //    }
-            //}
+                    if (uploadResult.Error == null)
+                    {
+                        var productImage = new ProductImage
+                        {
+                            Url = uploadResult.SecureUrl.AbsoluteUri,
+                            Name = uploadResult.PublicId,
+                        };
+                        product.Images.Add(productImage);
+                    }
+                }
+            }
             await _uow.Products.CreateAsync(product);
             await _uow.SaveChangesAsync();
 
@@ -189,9 +184,36 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<ServiceResult<Product>> UpdateAsync(UpdateProductDTO model)
         {
-            var product = await _uow.Products.GetByIdAsync(model.Id);
+            var product = await _uow.Products.GetFirstOrDefaultAsync(p => p.Id == model.Id, "Images");
             if (product == null) return new ServiceResult<Product> { IsSuccess = false, Message = "Not Exist" };
 
+            var removeImages = product.Images
+                .Where(x => !model.ExistImages.Contains(x.Id))
+                .ToList();
+
+            foreach (var img in removeImages)
+            {
+                if (!string.IsNullOrEmpty(img.Name))
+                {
+                    await _cloudinaryService.DeletePhotoAsync(img.Name);
+                }  
+                product.Images.Remove(img);
+            }
+
+            if (model.Images != null && model.Images.Any())
+            {
+                foreach (var file in model.Images)
+                {
+                    // upload cloudinary
+                    var imageUrl = await _cloudinaryService.AddPhotoAsync(file);
+
+                    product.Images.Add(new ProductImage
+                    {
+                        Name = imageUrl.PublicId,
+                        Url = imageUrl.SecureUrl.AbsoluteUri
+                    });
+                }
+            }
             product.UpdateFromDto(model);
             _uow.Products.Update(product);
             await _uow.SaveChangesAsync();
@@ -203,10 +225,21 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<ServiceResult<bool>> DeleteAsync(int id)
         {
-            var product = await _uow.Products.GetByIdAsync(id);
+            var product = await _uow.Products.GetFirstOrDefaultAsync(p => p.Id == id,"Images");
             if (product == null) return new ServiceResult<bool> { IsSuccess = false,Message="Product do not exist!" };
 
             try {
+                if (product.Images != null && product.Images.Any())
+                {
+                    foreach (var img in product.Images)
+                    {
+                        if (!string.IsNullOrEmpty(img.Name)) 
+                        {
+                            await _cloudinaryService.DeletePhotoAsync(img.Name);
+                        }
+                    }
+                }
+
                 _uow.Products.Delete(product);
                 await _uow.SaveChangesAsync();
 
@@ -222,15 +255,8 @@ namespace RetailSystem.Infrastructure.Services
 
                 return new ServiceResult<bool> { IsSuccess = false, Message = "Error occured while update data" };
             }
-            
-            //_uow.Products.Delete(product);
-            //await _uow.SaveChangesAsync();
-
-            //_cache.Remove(ProductCacheKey);
-
-            //return new ServiceResult<bool> { IsSuccess = true };
         }
-
+         
         public async Task<ServiceResult<PageResult<Product>>> GetPagedAsync(int page, int pageSize)
         {
             var (items, totalCount) = await _uow.Products.GetPagedAsync(page, pageSize);

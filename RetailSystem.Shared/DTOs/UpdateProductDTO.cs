@@ -1,4 +1,5 @@
-﻿using RetailSystem.Domain.Enums;
+﻿using Microsoft.AspNetCore.Http;
+using RetailSystem.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -28,5 +29,7 @@ namespace RetailSystem.Shared.DTOs
         public string? RAM { get; set; }
         public string? SSD { get; set; } 
         public int? CategoryId { get; set; }
+        public List<IFormFile>? Images { get; set; }
+        public List<int> ExistImages { get; set; } = new();
     }
 }

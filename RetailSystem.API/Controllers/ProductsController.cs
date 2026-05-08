@@ -43,8 +43,8 @@ namespace RetailSystem.API.Controllers
 
         // POST api/products
         [HttpPost]
-
-        public async Task<IActionResult> CreateAsync(CreateProductDTO model)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateAsync([FromForm] CreateProductDTO model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -54,8 +54,13 @@ namespace RetailSystem.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateAsync(int id,UpdateProductDTO model)
         {
+            if(id <= 0 || id != model.Id)
+            {
+                return BadRequest(new { message = "Invalid Product ID." });
+            }
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var result = await _productService.UpdateAsync(model);
@@ -66,6 +71,10 @@ namespace RetailSystem.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            if(id <= 0)
+            {
+                return BadRequest(new { message = "Invalid product ID." });
+            }
             var result = await _productService.DeleteAsync(id);
 
             if (!result.IsSuccess)
