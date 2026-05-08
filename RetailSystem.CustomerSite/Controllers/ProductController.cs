@@ -19,14 +19,6 @@ namespace RetailSystem.CustomerSite.Controllers
             _reviewService = reviewService;
         }
 
-        //public async Task<IActionResult> Index()
-        //{
-        //    var result = await _productService.GetAllProductAsync();
-        //    if (!result.IsSuccess) return BadRequest(result.Message);
-        //    var vm = result?.Data?.Select(p => p.ToCardVM()).ToList();
-
-        //    return View(vm);
-        //}
         public async Task<IActionResult> Index(int page = 1)
         {
             int pageSize = 8;
@@ -47,10 +39,11 @@ namespace RetailSystem.CustomerSite.Controllers
 
         public async Task<IActionResult> Detail(int id)
         {
+            if (id <= 0) return BadRequest("Invalid input !");
             var result = await _productService.GetProductByIdAsync(id);
             if (!result.IsSuccess)
             {
-                return View("Error");
+                return NotFound();
             }
             var reviews = await _reviewService.GetProductReviewsAsync(id);
 
@@ -61,6 +54,8 @@ namespace RetailSystem.CustomerSite.Controllers
 
         public async Task<IActionResult> ByCategory(int id)
         {
+            if (id <= 0) return BadRequest("Invalid input !");
+
             var categoryResult = await _categoryService.GetByIdAsync(id);
             Console.WriteLine(categoryResult.Data?.Name);
             ViewBag.CategoryName = categoryResult.Data?.Name;
@@ -83,9 +78,6 @@ namespace RetailSystem.CustomerSite.Controllers
 
             return View(productsVm);
         }
-        //public ActionResult Index()
-        //{
-        //    return View("./views/product/test.cshtml");
-        //}
+
     }
 }

@@ -29,6 +29,10 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<Order> CreateOrderAsync(string userId, OrderDTO orderDto, string PaymentMethod)
         {
+            if(string.IsNullOrEmpty(PaymentMethod) || string.IsNullOrEmpty(userId) || orderDto==null)
+            {
+                throw new Exception("Invalid input");
+            }
             var cart = await _uow.Carts.GetCartByUserIdAsync(userId);
             if (cart == null || !cart.Items.Any()) throw new Exception("Empty Cart");
 
@@ -52,14 +56,12 @@ namespace RetailSystem.Infrastructure.Services
                 {
                     order.Status = OrderStatus.Processing;
                 }
-
-                // 3. Chuyển CartItem sang OrderDetail và trừ kho
+                //Chuyển CartItem sang OrderDetail và trừ kho
                 foreach (var item in cart.Items)
                 {
                     // Kiểm tra tồn kho
                     if (item.Product.Quantity < item.Quantity)
                         throw new Exception($"Product {item.Product.Name} is out of stock.");
-
                     // Thêm detail trực tiếp vào list của Order
                     order.OrderDetails.Add(new OrderDetail
                     {
@@ -71,14 +73,7 @@ namespace RetailSystem.Infrastructure.Services
                     // Cập nhật số lượng sản phẩm
                     item.Product.Quantity -= item.Quantity;
                 }
-
-                // 4. Lưu Order (EF sẽ tự lưu luôn các OrderDetail vì chúng nằm trong List của Order)
                 await _uow.Orders.CreateAsync(order);
-
-                // 5. Xóa giỏ hàng
-                //_uow.Carts.ClearCart(cart);
-
-
                 await _uow.SaveChangesAsync();
                 await _uow.CommitTransactionAsync();
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RetailSystem.Domain.Entities;
@@ -9,6 +10,7 @@ using RetailSystem.Shared.ViewModels;
 
 namespace RetailSystem.CustomerSite.Controllers
 {
+    [Authorize]
     public class OrderController : Controller
     {
         private readonly UserManager<User> _userManager;
@@ -174,6 +176,7 @@ namespace RetailSystem.CustomerSite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id)
         {
+            if(id <= 0) return BadRequest("Invalid input !");
             try
             {
                 var userId = _userManager.GetUserId(User);
@@ -214,6 +217,7 @@ namespace RetailSystem.CustomerSite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Received(int id)
         {
+            if (id <= 0) return BadRequest("Invalid input !");
             try
             {
                 var userId = _userManager.GetUserId(User);

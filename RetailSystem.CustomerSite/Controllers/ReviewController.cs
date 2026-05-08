@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RetailSystem.Domain.Entities;
 using RetailSystem.Infrastructure.Services;
@@ -8,6 +9,7 @@ using RetailSystem.Shared.ViewModels;
 
 namespace RetailSystem.CustomerSite.Controllers
 {
+    [Authorize]
     public class ReviewController : Controller
     {
         private readonly UserManager<User> _userManager;
@@ -33,7 +35,11 @@ namespace RetailSystem.CustomerSite.Controllers
         [HttpGet]
         public async Task<IActionResult> Rate(int id, int productId)
         {
+            if (id <= 0 || productId <= 0)
+                return BadRequest("Invalid input !");
             var userId = _userManager.GetUserId(User);
+            if (userId == null)
+                return Unauthorized();
 
             var order = await _orderService.GetOrderWithDetailsAsync(id, userId);
             if (order == null)
@@ -89,6 +95,8 @@ namespace RetailSystem.CustomerSite.Controllers
         [HttpGet]
         public async Task<IActionResult> CheckReviewed(int orderId, int productId)
         {
+            if (orderId <= 0 || productId <= 0)
+                return Json(new { isReviewed = false });
             var userId = _userManager.GetUserId(User);
 
             var exists = await _reviewService.IsReviewedAsync(productId, orderId, userId);

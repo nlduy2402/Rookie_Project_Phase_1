@@ -11,6 +11,7 @@ namespace RetailSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class ProductsController : BaseController
     {
         private readonly IProductService _productService;

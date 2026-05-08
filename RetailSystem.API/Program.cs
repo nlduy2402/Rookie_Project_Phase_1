@@ -14,6 +14,8 @@ using RetailSystem.API.Shared;
 using RetailSystem.Infrastructure.Repository.Interface;
 using RetailSystem.Infrastructure.Repository;
 using RetailSystem.Shared.Settings;
+using Microsoft.AspNetCore.Identity;
+using RetailSystem.Domain.Entities;
 
 // Use Serilog for logging
 Log.Logger = new LoggerConfiguration()
@@ -35,7 +37,8 @@ try
         options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")
         ));
-
+    builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>();
     builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
@@ -45,11 +48,14 @@ try
         });
     builder.Services.AddProblemDetails();
 
-    var jwt = builder.Configuration.GetSection("Jwt");
-
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
+        var jwtConfig = builder.Configuration.GetSection("Jwt");
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -57,13 +63,13 @@ try
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
 
-            ValidIssuer = jwt["Issuer"],
-            ValidAudience = jwt["Audience"],
+            ValidIssuer = jwtConfig["Issuer"],
+            ValidAudience = jwtConfig["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwt["Key"]!)
-            )
+            Encoding.UTF8.GetBytes(jwtConfig["Key"]!))
         };
-    });
+    })
+    ;
     builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -81,6 +87,7 @@ try
     builder.Services.AddScoped<IAdminService, AdminService>();
     builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
     builder.Services.AddScoped<IOrderService, OrderService>();
+    builder.Services.AddScoped<IUserService, UserService>();
 
 
     builder.Services.AddCors(options => {

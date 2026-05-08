@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RetailSystem.Domain.Entities;
 using RetailSystem.Infrastructure.Services;
@@ -9,6 +10,7 @@ namespace RetailSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles ="Admin")]
     public class CategoriesController : BaseController
     {
         private readonly ICategoryService _categoryService;
@@ -65,7 +67,8 @@ namespace RetailSystem.API.Controllers
             try
             {
                 var result = await _categoryService.DeleteAsync(id);
-                return Ok(result);
+                if (!result.IsSuccess) return NotFound(result.Message);
+                return OkResponse(result.Data, result.Message);
             }
             catch (Exception ex) {
                 throw new Exception("Can not do this !");

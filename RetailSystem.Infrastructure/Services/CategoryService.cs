@@ -125,5 +125,28 @@ namespace RetailSystem.Infrastructure.Services
                 Message = "Category Updated !"
             };
         }
+
+        public async new Task<ServiceResult<string>> DeleteAsync(int id)
+        {
+            var result = await GetByIdAsync(id);
+            if (!result.IsSuccess || result.Data == null)
+            {
+                return new ServiceResult<string>
+                {
+                    IsSuccess = false,
+                    Message = "Error Occured While Deleting Category"
+                };
+            }
+            var category = result.Data;
+            _uow.Categories.Delete(category);
+            await _uow.SaveChangesAsync();
+            _cache.Remove("AllCategories");
+            _cache.Remove($"Category_{id}");
+            return new ServiceResult<string>
+            {
+                IsSuccess = true,
+                Data = "Category Deleted !"
+            };
+        }
     }
 }

@@ -38,8 +38,6 @@ namespace RetailSystem.CustomerSite.Controllers
             return Json(result);
         }
 
-
-
         [HttpPost]
         public async Task<IActionResult> Add(int productId, int quantity = 1)
         {
