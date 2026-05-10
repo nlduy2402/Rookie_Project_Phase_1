@@ -86,11 +86,6 @@ namespace RetailSystem.Infrastructure.Services
             }
         }
 
-        //public async Task<IEnumerable<Order>> GetOrderHistoryAsync(string userId)
-        //{
-
-        //    return await _uow.Orders.GetOrderHistoryByUserIdAsync(userId);
-        //}
         public async Task<Order?> GetByTxnRefAsync(string txnRef)
         {
             return await _uow.Orders.GetFirstOrDefaultAsync(x => x.TxnRef == txnRef);
@@ -154,6 +149,8 @@ namespace RetailSystem.Infrastructure.Services
         public async Task<ServiceResult<PageResult<Order>>> GetUserOrdersPagedAsync(
             string userId, int page, int pageSize)
         {
+            if (userId == null) throw new ArgumentNullException("userId Not Be Null");
+            if (page <= 0 || pageSize <= 0) throw new Exception("Page Value Is Invalid");
             var result = await _uow.Orders.GetOrderHistoryByUserIdAsync(userId, page, pageSize);
 
             return new ServiceResult<PageResult<Order>>
@@ -175,35 +172,7 @@ namespace RetailSystem.Infrastructure.Services
 
             return order;
         }
-        //public async Task ShipOrderAsync(int orderId, string userId)
-        //{
-        //    var order = await _uow.Orders.GetByIdAsync(orderId);
-
-        //    if (order == null)
-        //        throw new Exception("Order not found");
-
-        //    if (order.UserId != userId)
-        //        throw new Exception("Unauthorized");
-
-        //    if (order.Status != OrderStatus.Processing && order.Status != OrderStatus.Pending)
-        //        throw new Exception("Order not ready to ship");
-
-        //    await _uow.BeginTransactionAsync();
-
-        //    try
-        //    {
-        //        order.Status = OrderStatus.Shipped;
-
-        //        await _uow.SaveChangesAsync();
-        //        await _uow.CommitTransactionAsync();
-        //    }
-        //    catch
-        //    {
-        //        await _uow.RollbackTransactionAsync();
-        //        throw;
-        //    }
-        //}
-
+ 
         public async Task<ServiceResult<string>> ShipOrderAsync(int orderId)
         {
             var order = await _uow.Orders.GetByIdAsync(orderId);
@@ -263,6 +232,7 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<ServiceResult<PageResult<Order>>> GetAllOrdersPagedAsync(int page, int pageSize)
         {
+            if (pageSize <= 0 || page <= 0) throw new Exception("Invalid Pages Value");
             var result = await _uow.Orders.GetAllOrdersPagedAsync(page, pageSize);
             return new ServiceResult<PageResult<Order>>
             {

@@ -21,17 +21,11 @@ namespace RetailSystem.CustomerSite.Controllers
 
         public async Task<IActionResult> Index()
         {
-            //var result = await _productService.GetAllProductAsync();
-            //if (!result.IsSuccess) return BadRequest(result.Message);
-
-            //var vm = result?.Data?.Select(p => p.ToCardVM()).ToList() ?? new List<ProductViewModel>();
-
-            //return View(vm);
 
             var result = await _productService.GetTopSellingProductCardsAsync(4);
             if (!result.IsSuccess) return BadRequest(result.Message);
 
-            return View(result.Data);
+            return View(result.Data ?? Enumerable.Empty<ProductViewModel>());
         }
 
         public IActionResult Privacy()

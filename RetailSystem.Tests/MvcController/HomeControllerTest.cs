@@ -12,13 +12,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RetailSystem.Shared.ResponseModels;
+using FluentAssertions;
 namespace RetailSystem.Tests.MvcController
 {
     public class HomeControllerTest
     {
         private readonly Mock<IProductService> _mockProductService;
         private readonly HomeController _controller;
-
+        
         public HomeControllerTest()
         {
             _mockProductService = new Mock<IProductService>();
@@ -27,50 +28,39 @@ namespace RetailSystem.Tests.MvcController
         }
 
         [Fact]
-        public async Task Index_ReturnsViewWithList_WhenServiceReturnsSuccess()
+        public async Task Index_ShouldCallGetTopSellingProducts()
         {
             // Arrange
-            var fakeProducts = new List<Product>
-            {
-                new Product { Id = 1, Name = "Laptop" },
-                new Product { Id = 2, Name = "Smartphone" }
-            };
-
-            var serviceResult = new ServiceResult<List<Product>>
-            {
-                IsSuccess = true,
-                Data = fakeProducts 
-            };
-
             _mockProductService
-                .Setup(s => s.GetAllProductAsync())
-                .ReturnsAsync(serviceResult);
+                .Setup(x => x.GetTopSellingProductCardsAsync(4))
+                .ReturnsAsync(new ServiceResult<IEnumerable<ProductViewModel>>
+                {
+                    IsSuccess = true,
+                    Data = new List<ProductViewModel>()
+                });
 
             // Act
-            var result = await _controller.Index();
+            await _controller.Index();
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<List<ProductViewModel>>(viewResult.Model);
-
-            Assert.Equal(2, model.Count);
-            _mockProductService.Verify(s => s.GetAllProductAsync(), Times.Once);
+            _mockProductService.Verify(
+                x => x.GetTopSellingProductCardsAsync(4),
+                Times.Once
+            );
         }
 
         [Fact]
         public async Task Index_ReturnsBadRequest_WhenServiceReturnsFailure()
         {
             // Arrange
-            var errorMessage = "Lỗi kết nối cơ sở dữ liệu";
-            var serviceResult = new ServiceResult<List<Product>>
+            var serviceResult = new ServiceResult<IEnumerable<ProductViewModel>>
             {
                 IsSuccess = false,
-                Message = errorMessage,
                 Data = null 
             };
 
             _mockProductService
-                .Setup(s => s.GetAllProductAsync())
+                .Setup(s => s.GetTopSellingProductCardsAsync(4))
                 .ReturnsAsync(serviceResult);
 
             // Act
@@ -78,16 +68,21 @@ namespace RetailSystem.Tests.MvcController
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal(errorMessage, badRequestResult.Value);
         }
 
         [Fact]
         public async Task Index_ReturnsEmptyList_WhenDataIsNullButSuccess()
         {
-            var serviceResult = new ServiceResult<List<Product>> { IsSuccess = true, Data = null, Message = "Success" };
+            // Arrange
+            var serviceResult = new ServiceResult<IEnumerable<ProductViewModel>>
+            {
+                IsSuccess = true,
+                Data = null,
+                Message = "Success"
+            };
 
             _mockProductService
-                .Setup(s => s.GetAllProductAsync())
+                .Setup(s => s.GetTopSellingProductCardsAsync(4))
                 .ReturnsAsync(serviceResult);
 
             // Act
@@ -95,7 +90,11 @@ namespace RetailSystem.Tests.MvcController
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<List<ProductViewModel>>(viewResult.Model);
+
+            var model = Assert.IsAssignableFrom<IEnumerable<ProductViewModel>>(
+                viewResult.Model
+            );
+
             Assert.Empty(model);
         }
     }

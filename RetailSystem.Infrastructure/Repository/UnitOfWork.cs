@@ -33,7 +33,6 @@ namespace RetailSystem.Infrastructure.Repository
             Products = new ProductRepository(_context);
             Categories = new BaseRepository<Category>(_context);
             AdminAccounts = new BaseRepository<AdminAccount>(_context);
-            //Carts = new BaseRepository<Cart>(_context);
             Carts = new CartRepository(_context);
             Orders = new OrderRepository(_context);
             Reviews = new ReviewRepository(_context);

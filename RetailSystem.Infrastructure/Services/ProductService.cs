@@ -55,6 +55,8 @@ namespace RetailSystem.Infrastructure.Services
 
         public async Task<ServiceResult<Product>> GetProductByIdAsync(int id)
         {
+            if(id <= 0) return new ServiceResult<Product> { IsSuccess = false, Message = "Invalid Product Id" };
+
             var product = await _uow.Products.GetFirstOrDefaultAsync(p => p.Id == id, "Images,Category");
 
             if (product == null) return new ServiceResult<Product> { IsSuccess = false, Message = "Product Not Exist" };
@@ -63,6 +65,14 @@ namespace RetailSystem.Infrastructure.Services
         }
         public async Task<ServiceResult<ProductDetailViewModel>> GetProductByIdWithReviewAsync(int id)
         {
+            if (id <= 0)
+            {
+                return new ServiceResult<ProductDetailViewModel>
+                {
+                    IsSuccess = false,
+                    Message = "Invalid Product Id"
+                };
+            }
             var product = await _uow.Products.GetFirstOrDefaultAsync(
                 p => p.Id == id,
                 "Images,Category"
@@ -108,6 +118,7 @@ namespace RetailSystem.Infrastructure.Services
         }
         public async Task<ServiceResult<List<Product>>> GetByCategory(int id)
         {
+            if(id <= 0) return new ServiceResult<List<Product>>() { IsSuccess = false, Message="Invalid Input."};
             string _cacheKey = $"Products_Category_{id}";
 
             if (!_cache.TryGetValue(_cacheKey, out List<Product>? products))

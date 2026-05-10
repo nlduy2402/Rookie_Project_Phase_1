@@ -14,8 +14,6 @@ export default function UsersPage() {
     queryFn: () => usersApi.list(),
   });
 
-  // Truy cập vào mảng data bên trong object response
-
   const removeMut = useMutation({
     mutationFn: (id) => usersApi.remove(id),
     onSuccess: () => {

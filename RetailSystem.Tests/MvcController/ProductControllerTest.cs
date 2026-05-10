@@ -11,98 +11,467 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RetailSystem.Shared.ResponseModels;
+using FluentAssertions;
 
 namespace RetailSystem.Tests.MvcController
 {
     public class ProductControllerTest
     {
-        private readonly Mock<IProductService> _mockProductService;
-        private readonly Mock<ICategoryService> _mockCategoryService;
+        private readonly Mock<IProductService> _productServiceMock;
+        private readonly Mock<ICategoryService> _categoryServiceMock;
+        private readonly Mock<IReviewService> _reviewServiceMock;
+
         private readonly ProductController _controller;
 
         public ProductControllerTest()
         {
-            _mockProductService = new Mock<IProductService>();
-            _mockCategoryService = new Mock<ICategoryService>();
-            //_controller = new ProductController(_mockProductService.Object, _mockCategoryService.Object);
+            _productServiceMock = new Mock<IProductService>();
+            _categoryServiceMock = new Mock<ICategoryService>();
+            _reviewServiceMock = new Mock<IReviewService>();
+
+            _controller = new ProductController(
+                _productServiceMock.Object,
+                _categoryServiceMock.Object,
+                _reviewServiceMock.Object
+            );
         }
 
         #region Index Tests
         [Fact]
-        public async Task Index_ReturnsViewWithProducts_WhenSuccess()
+        public async Task Index_WhenServiceFails_ShouldReturnBadRequest()
         {
             // Arrange
-            var products = new List<Product> { new Product { Id = 1, Name = "P1" } };
-            var serviceResult = new ServiceResult<List<Product>>
-            {
-                IsSuccess = true,
-                Data = products
-            };
-
-            _mockProductService.Setup(s => s.GetAllProductAsync()).ReturnsAsync(serviceResult);
+            _productServiceMock
+                .Setup(x => x.GetPagedAsync(1, 8))
+                .ReturnsAsync(new ServiceResult<PageResult<Product>>
+                {
+                    IsSuccess = false,
+                    Message = "Error"
+                });
 
             // Act
             var result = await _controller.Index();
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.IsAssignableFrom<List<ProductViewModel>>(viewResult.Model);
+            result.Should().BeOfType<BadRequestObjectResult>();
+
+            var badRequest = result as BadRequestObjectResult;
+
+            badRequest.Value.Should().Be("Error");
         }
 
         [Fact]
-        public async Task Index_ReturnsBadRequest_WhenFailure()
+        public async Task Index_WhenServiceSucceeds_ShouldReturnViewResult()
         {
             // Arrange
-            var serviceResult = new ServiceResult<List<Product>>
+            var products = new List<Product>
+        {
+            new Product
             {
-                IsSuccess = false,
-                Message = "Error"
+                Id = 1,
+                Name = "Laptop",
+                Price = 1000
+            }
+        };
+
+            var pagedResult = new PageResult<Product>
+            {
+                Items = products,
+                Page = 1,
             };
-            _mockProductService.Setup(s => s.GetAllProductAsync()).ReturnsAsync(serviceResult);
+
+            _productServiceMock
+                .Setup(x => x.GetPagedAsync(1, 8))
+                .ReturnsAsync(new ServiceResult<PageResult<Product>>
+                {
+                    IsSuccess = true,
+                    Data = pagedResult
+                });
 
             // Act
             var result = await _controller.Index();
 
             // Assert
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Error", badRequest.Value);
+            result.Should().BeOfType<ViewResult>();
+
+            var viewResult = result as ViewResult;
+
+            viewResult.Model.Should().BeOfType<ProductIndexViewModel>();
+        }
+
+        [Fact]
+        public async Task Index_ShouldMapProductsToCardViewModel()
+        {
+            // Arrange
+            var products = new List<Product>
+        {
+            new Product
+            {
+                Id = 1,
+                Name = "Laptop",
+                Price = 1000
+            }
+        };
+
+            var pagedResult = new PageResult<Product>
+            {
+                Items = products,
+                Page = 1,
+            };
+
+            _productServiceMock
+                .Setup(x => x.GetPagedAsync(1, 8))
+                .ReturnsAsync(new ServiceResult<PageResult<Product>>
+                {
+                    IsSuccess = true,
+                    Data = pagedResult
+                });
+
+            // Act
+            var result = await _controller.Index();
+
+            // Assert
+            var viewResult = result as ViewResult;
+
+            var model = viewResult.Model as ProductIndexViewModel;
+
+            model.Items.Should().HaveCount(1);
+
+            model.Items.First().Name.Should().Be("Laptop");
+        }
+
+        [Fact]
+        public async Task Index_ShouldSetCorrectPaginationData()
+        {
+            // Arrange
+            var pagedResult = new PageResult<Product>
+            {
+                Items = new List<Product>(),
+                Page = 2,
+                PageSize = 8,
+                TotalCount = 80
+            };
+
+            _productServiceMock
+                .Setup(x => x.GetPagedAsync(2, 8))
+                .ReturnsAsync(new ServiceResult<PageResult<Product>>
+                {
+                    IsSuccess = true,
+                    Data = pagedResult
+                });
+
+            // Act
+            var result = await _controller.Index(2);
+
+            // Assert
+            var viewResult = result as ViewResult;
+
+            var model = viewResult.Model as ProductIndexViewModel;
+
+            model.Page.Should().Be(2);
+
+            model.TotalPages.Should().Be(10);
+        }
+
+        [Fact]
+        public async Task Index_ShouldCallGetPagedAsyncWithCorrectParameters()
+        {
+            // Arrange
+            _productServiceMock
+                .Setup(x => x.GetPagedAsync(3, 8))
+                .ReturnsAsync(new ServiceResult<PageResult<Product>>
+                {
+                    IsSuccess = true,
+                    Data = new PageResult<Product>
+                    {
+                        Items = new List<Product>(),
+                        Page = 3,
+                    }
+                });
+
+            // Act
+            await _controller.Index(3);
+
+            // Assert
+            _productServiceMock.Verify(
+                x => x.GetPagedAsync(3, 8),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task Index_WhenItemsEmpty_ShouldReturnEmptyViewModel()
+        {
+            // Arrange
+            var pagedResult = new PageResult<Product>
+            {
+                Items = new List<Product>(),
+                Page = 1
+                
+            };
+
+            _productServiceMock
+                .Setup(x => x.GetPagedAsync(1, 8))
+                .ReturnsAsync(new ServiceResult<PageResult<Product>>
+                {
+                    IsSuccess = true,
+                    Data = pagedResult
+                });
+
+            // Act
+            var result = await _controller.Index();
+
+            // Assert
+            var viewResult = result as ViewResult;
+
+            var model = viewResult.Model as ProductIndexViewModel;
+
+            model.Items.Should().BeEmpty();
         }
         #endregion
 
         #region Detail Tests
         [Fact]
-        public async Task Detail_ReturnsViewWithProduct_WhenIdExists()
+        public async Task Detail_WhenIdInvalid_ShouldReturnBadRequest()
         {
-            // Arrange
-            int id = 1;
-            var product = new Product { Id = id, Name = "Laptop" };
-            var serviceResult = new ServiceResult<Product> { IsSuccess = true, Data = product };
-
-            _mockProductService.Setup(s => s.GetProductByIdAsync(id)).ReturnsAsync(serviceResult);
-
             // Act
-            var result = await _controller.Detail(id);
+            var result = await _controller.Detail(0);
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            // Kiểm tra xem Model có phải ProductViewModel không (giả định ToDetailVM trả về type này)
-            Assert.NotNull(viewResult.Model);
+            result.Should().BeOfType<BadRequestObjectResult>();
+
+            var badRequest = result as BadRequestObjectResult;
+
+            badRequest.Value.Should().Be("Invalid input !");
         }
 
         [Fact]
-        public async Task Detail_ReturnsErrorView_WhenProductNotFound()
+        public async Task Detail_WhenProductNotFound_ShouldReturnNotFound()
         {
             // Arrange
-            int id = 99;
-            var serviceResult = new ServiceResult<Product> { IsSuccess = false };
-            _mockProductService.Setup(s => s.GetProductByIdAsync(id)).ReturnsAsync(serviceResult);
+            _productServiceMock
+                .Setup(x => x.GetProductByIdAsync(1))
+                .ReturnsAsync(new ServiceResult<Product>
+                {
+                    IsSuccess = false
+                });
 
             // Act
-            var result = await _controller.Detail(id);
+            var result = await _controller.Detail(1);
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.Equal("Error", viewResult.ViewName);
+            result.Should().BeOfType<NotFoundResult>();
+        }
+
+        [Fact]
+        public async Task Detail_WhenProductExists_ShouldReturnViewResult()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Name = "Laptop",
+                Price = 1000,
+                Images = new List<ProductImage>()
+            };
+
+            var reviews = new List<Review>
+    {
+        new Review
+        {
+            Rating = 5,
+            Comment = "Good"
+        }
+    };
+
+            _productServiceMock
+                .Setup(x => x.GetProductByIdAsync(1))
+                .ReturnsAsync(new ServiceResult<Product>
+                {
+                    IsSuccess = true,
+                    Data = product
+                });
+
+            _reviewServiceMock
+                .Setup(x => x.GetProductReviewsAsync(1))
+                .ReturnsAsync(reviews);
+
+            // Act
+            var result = await _controller.Detail(1);
+
+            // Assert
+            result.Should().BeOfType<ViewResult>();
+        }
+
+        [Fact]
+        public async Task Detail_ShouldReturnProductDetailViewModel()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Name = "Laptop",
+                Price = 1000,
+                Images = new List<ProductImage>()
+            };
+
+            var reviews = new List<Review>
+    {
+        new Review
+        {
+            Rating = 5,
+            Comment = "Excellent"
+        }
+    };
+
+            _productServiceMock
+                .Setup(x => x.GetProductByIdAsync(1))
+                .ReturnsAsync(new ServiceResult<Product>
+                {
+                    IsSuccess = true,
+                    Data = product
+                });
+
+            _reviewServiceMock
+                .Setup(x => x.GetProductReviewsAsync(1))
+                .ReturnsAsync(reviews);
+
+            // Act
+            var result = await _controller.Detail(1);
+
+            // Assert
+            var viewResult = result as ViewResult;
+
+            viewResult.Model.Should()
+                .BeOfType<ProductDetailViewModel>();
+        }
+
+        [Fact]
+        public async Task Detail_ShouldMapProductDataCorrectly()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Name = "Laptop",
+                Price = 1500,
+                Description = "Gaming Laptop",
+                Images = new List<ProductImage>()
+            };
+
+            _productServiceMock
+                .Setup(x => x.GetProductByIdAsync(1))
+                .ReturnsAsync(new ServiceResult<Product>
+                {
+                    IsSuccess = true,
+                    Data = product
+                });
+
+            _reviewServiceMock
+                .Setup(x => x.GetProductReviewsAsync(1))
+                .ReturnsAsync(new List<Review>());
+
+            // Act
+            var result = await _controller.Detail(1);
+
+            // Assert
+            var viewResult = result as ViewResult;
+
+            var model = viewResult.Model as ProductDetailViewModel;
+
+            model.Name.Should().Be("Laptop");
+
+            model.Price.Should().Be(1500);
+
+            model.Description.Should().Be("Gaming Laptop");
+        }
+
+        [Fact]
+        public async Task Detail_ShouldCallGetProductByIdAsync()
+        {
+            // Arrange
+            _productServiceMock
+                .Setup(x => x.GetProductByIdAsync(1))
+                .ReturnsAsync(new ServiceResult<Product>
+                {
+                    IsSuccess = true,
+                    Data = new Product
+                    {
+                        Images = new List<ProductImage>()
+                    }
+                });
+
+            _reviewServiceMock
+                .Setup(x => x.GetProductReviewsAsync(1))
+                .ReturnsAsync(new List<Review>());
+
+            // Act
+            await _controller.Detail(1);
+
+            // Assert
+            _productServiceMock.Verify(
+                x => x.GetProductByIdAsync(1),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task Detail_ShouldCallGetProductReviewsAsync()
+        {
+            // Arrange
+            _productServiceMock
+                .Setup(x => x.GetProductByIdAsync(1))
+                .ReturnsAsync(new ServiceResult<Product>
+                {
+                    IsSuccess = true,
+                    Data = new Product
+                    {
+                        Images = new List<ProductImage>()
+                    }
+                });
+
+            _reviewServiceMock
+                .Setup(x => x.GetProductReviewsAsync(1))
+                .ReturnsAsync(new List<Review>());
+
+            // Act
+            await _controller.Detail(1);
+
+            // Assert
+            _reviewServiceMock.Verify(
+                x => x.GetProductReviewsAsync(1),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task Detail_WhenNoReviews_ShouldStillReturnView()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Name = "Laptop",
+                Images = new List<ProductImage>()
+            };
+
+            _productServiceMock
+                .Setup(x => x.GetProductByIdAsync(1))
+                .ReturnsAsync(new ServiceResult<Product>
+                {
+                    IsSuccess = true,
+                    Data = product
+                });
+
+            _reviewServiceMock
+                .Setup(x => x.GetProductReviewsAsync(1))
+                .ReturnsAsync(new List<Review>());
+
+            // Act
+            var result = await _controller.Detail(1);
+
+            // Assert
+            result.Should().BeOfType<ViewResult>();
         }
         #endregion
 
@@ -115,10 +484,10 @@ namespace RetailSystem.Tests.MvcController
             var category = new Category { Id = catId, Name = "Electronics", Description = "Desc" };
             var products = new List<Product> { new Product { Id = 10, Name = "Phone" } };
 
-            _mockCategoryService.Setup(s => s.GetByIdAsync(catId))
+            _categoryServiceMock.Setup(s => s.GetByIdAsync(catId))
                 .ReturnsAsync(new ServiceResult<Category> { IsSuccess = true, Data = category });
 
-            _mockProductService.Setup(s => s.GetByCategory(catId))
+            _productServiceMock.Setup(s => s.GetByCategory(catId))
                 .ReturnsAsync(new ServiceResult<List<Product>> { IsSuccess = true, Data = products });
 
             // Act
@@ -138,10 +507,10 @@ namespace RetailSystem.Tests.MvcController
         {
             // Arrange
             int catId = 1;
-            _mockCategoryService.Setup(s => s.GetByIdAsync(catId))
+            _categoryServiceMock.Setup(s => s.GetByIdAsync(catId))
                 .ReturnsAsync(new ServiceResult<Category> { IsSuccess = true });
 
-            _mockProductService.Setup(s => s.GetByCategory(catId))
+            _productServiceMock.Setup(s => s.GetByCategory(catId))
                 .ReturnsAsync(new ServiceResult<List<Product>> { IsSuccess = true, Data = new List<Product>() });
 
             // Act
@@ -158,10 +527,10 @@ namespace RetailSystem.Tests.MvcController
         {
             // Arrange
             int catId = 1;
-            _mockCategoryService.Setup(s => s.GetByIdAsync(catId))
+            _categoryServiceMock.Setup(s => s.GetByIdAsync(catId))
                 .ReturnsAsync(new ServiceResult<Category> { IsSuccess = true });
 
-            _mockProductService.Setup(s => s.GetByCategory(catId))
+            _productServiceMock.Setup(s => s.GetByCategory(catId))
                 .ReturnsAsync(new ServiceResult<List<Product>> { IsSuccess = false, Message = "Failed" });
 
             // Act

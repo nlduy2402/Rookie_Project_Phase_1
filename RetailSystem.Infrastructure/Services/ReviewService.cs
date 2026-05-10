@@ -75,20 +75,6 @@ namespace RetailSystem.Infrastructure.Services
                     };
 
                     await _uow.Reviews.CreateAsync(review);
-
-                    //if (item.ImageUrls != null && item.ImageUrls.Any())
-                    //{
-                    //    foreach (var url in item.ImageUrls)
-                    //    {
-                    //        var img = new ReviewImage
-                    //        {
-                    //            Review = review,
-                    //            ImageUrl = url
-                    //        };
-
-                    //        await _uow.ReviewImages.CreateAsync(img);
-                    //    }
-                    //}
                 }
 
                 await _uow.SaveChangesAsync();

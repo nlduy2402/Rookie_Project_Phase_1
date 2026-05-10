@@ -58,7 +58,6 @@ namespace RetailSystem.Infrastructure.Services
                     // query
                     queryBuilder.Append(WebUtility.UrlEncode(item.Key) + "=" + WebUtility.UrlEncode(item.Value) + "&");
 
-                    // signData (loại SecureHashType)
                     if (item.Key != "vnp_SecureHashType")
                     {
                         hashDataBuilder.Append(item.Key + "=" + WebUtility.UrlEncode(item.Value) + "&");

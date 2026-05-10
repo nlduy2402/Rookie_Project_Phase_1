@@ -193,26 +193,6 @@ namespace RetailSystem.CustomerSite.Controllers
             return RedirectToAction("History");
         }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Ship(int id)
-        //{
-        //    try
-        //    {
-        //        var userId = _userManager.GetUserId(User);
-
-        //        await _orderService.ShipOrderAsync(id, userId);
-
-        //        TempData["SuccessMessage"] = "Order shipped!";
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        TempData["ErrorMessage"] = ex.Message;
-        //    }
-
-        //    return RedirectToAction("History");
-        //}
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Received(int id)

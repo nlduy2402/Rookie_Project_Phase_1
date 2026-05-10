@@ -67,7 +67,7 @@ export const productsApi = {
     }),
   update: (id, input) =>
     request(`/api/products/${id}`, {
-      method: "PUT", 
+      method: "PUT",
       body: input,
     }),
   remove: (id) => request(`/api/products/${id}`, { method: "DELETE" }),

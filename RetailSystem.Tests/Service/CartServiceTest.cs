@@ -12,29 +12,48 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using RetailSystem.Shared.ResponseModels;
+using RetailSystem.Infrastructure.Services.Interfaces;
 
 namespace RetailSystem.Tests.Service
 {
     public class CartServiceTests
     {
         private readonly Mock<IUnitOfWork> _uowMock;
-        private readonly Mock<IBaseRepository<Cart>> _cartRepoMock;
-        private readonly Mock<IBaseRepository<Product>> _productRepoMock;
+        private readonly Mock<ICartRepository> _cartRepoMock;
+        private readonly Mock<IMemoryCache> _cacheMock;
+        private readonly Mock<ICacheEntry> _cacheEntryMock;
+        private readonly Mock<IProductRepository> _productRepoMock;
 
-        private readonly CartService _service;
+
+        private readonly CartService _cartService;
 
         public CartServiceTests()
         {
+            // Mock objects
             _uowMock = new Mock<IUnitOfWork>();
-            _cartRepoMock = new Mock<IBaseRepository<Cart>>();
-            _productRepoMock = new Mock<IBaseRepository<Product>>();
+            _cartRepoMock = new Mock<ICartRepository>();
+            _cacheMock = new Mock<IMemoryCache>();
+            _cacheEntryMock = new Mock<ICacheEntry>();
+            _productRepoMock = new Mock<IProductRepository>();
 
-            //_uowMock.Setup(x => x.Carts).Returns(_cartRepoMock.Object);
-            //_uowMock.Setup(x => x.Products).Returns(_productRepoMock.Object);
+            // Setup repository
+            _uowMock
+                .Setup(x => x.Carts)
+                .Returns(_cartRepoMock.Object);
+            _uowMock
+                .Setup(x => x.Products)
+                .Returns(_productRepoMock.Object);
 
-            var cache = new MemoryCache(new MemoryCacheOptions());
+            // Setup cache for Set()
+            _cacheMock
+                .Setup(x => x.CreateEntry(It.IsAny<object>()))
+                .Returns(_cacheEntryMock.Object);
 
-            _service = new CartService(_uowMock.Object, cache);
+            // Create service
+            _cartService = new CartService(
+                _uowMock.Object,
+                _cacheMock.Object
+            );
         }
 
         // Test GetCartAsync when cart exists, it should return the cart
@@ -49,7 +68,7 @@ namespace RetailSystem.Tests.Service
                     It.IsAny<string>()))
                 .ReturnsAsync(cart);
 
-            var result = await _service.GetCartAsync("u1");
+            var result = await _cartService.GetCartAsync("u1");
 
             result.Should().NotBeNull();
         }
@@ -64,7 +83,7 @@ namespace RetailSystem.Tests.Service
                     It.IsAny<string>()))
                 .ReturnsAsync((Cart)null);
 
-            var result = await _service.GetCartAsync("u1");
+            var result = await _cartService.GetCartAsync("u1");
 
             result.Should().BeNull();
         }
@@ -74,18 +93,18 @@ namespace RetailSystem.Tests.Service
         public async Task AddToCart_Should_Throw_When_Quantity_Invalid()
         {
             await Assert.ThrowsAsync<Exception>(() =>
-                _service.AddToCartAsync("u1", 1, 0));
+                _cartService.AddToCartAsync("u1", 1, 0));
         }
         // Test AddToCartAsync when product not exists, it should throw "Product not found"
         [Fact]
         public async Task AddToCart_Should_Throw_When_Product_Not_Exist()
         {
-            _productRepoMock
-                .Setup(x => x.GetByIdAsync(It.IsAny<int>()))
+            _uowMock
+                .Setup(x => x.Products.GetByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((Product)null);
 
             await Assert.ThrowsAsync<Exception>(() =>
-                _service.AddToCartAsync("u1", 1, 1));
+                _cartService.AddToCartAsync("u1", 1, 1));
         }
 
         // Test AddToCartAsync when cart not exists, it should create new cart
@@ -106,7 +125,7 @@ namespace RetailSystem.Tests.Service
 
             _uowMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            await _service.AddToCartAsync("u1", 1, 2);
+            await _cartService.AddToCartAsync("u1", 1, 2);
 
             _cartRepoMock.Verify(x => x.CreateAsync(It.IsAny<Cart>()), Times.Once);
         }
@@ -129,7 +148,7 @@ namespace RetailSystem.Tests.Service
 
             _uowMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            await _service.AddToCartAsync("u1", 1, 2);
+            await _cartService.AddToCartAsync("u1", 1, 2);
 
             cart.Items.Should().HaveCount(1);
         }
@@ -156,7 +175,7 @@ namespace RetailSystem.Tests.Service
 
             _uowMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            await _service.AddToCartAsync("u1", 1, 2);
+            await _cartService.AddToCartAsync("u1", 1, 2);
 
             cart.Items.First().Quantity.Should().Be(3);
         }
@@ -179,7 +198,7 @@ namespace RetailSystem.Tests.Service
 
             _uowMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            await _service.RemoveItemAsync("u1", 1);
+            await _cartService.RemoveItemAsync("u1", 1);
 
             cart.Items.Should().BeEmpty();
         }
@@ -194,7 +213,7 @@ namespace RetailSystem.Tests.Service
                 .Setup(x => x.GetFirstOrDefaultAsync(It.IsAny<Expression<Func<Cart, bool>>>(), "Items"))
                 .ReturnsAsync(cart);
 
-            await _service.RemoveItemAsync("u1", 1);
+            await _cartService.RemoveItemAsync("u1", 1);
 
             cart.Items.Should().BeEmpty();
         }
@@ -217,7 +236,7 @@ namespace RetailSystem.Tests.Service
 
             _uowMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            await _service.UpdateQuantityAsync("u1", 1, 5);
+            await _cartService.UpdateQuantityAsync("u1", 1, 5);
 
             cart.Items.First().Quantity.Should().Be(5);
         }
@@ -241,7 +260,7 @@ namespace RetailSystem.Tests.Service
 
             _uowMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            await _service.ClearCartAsync("u1");
+            await _cartService.ClearCartAsync("u1");
 
             cart.Items.Should().BeEmpty();
         }
@@ -275,7 +294,7 @@ namespace RetailSystem.Tests.Service
                 .Setup(x => x.GetFirstOrDefaultAsync(It.IsAny<Expression<Func<Cart, bool>>>(), It.IsAny<string>()))
                 .ReturnsAsync(cart);
 
-            var result = await _service.GetCartDtoAsync("u1");
+            var result = await _cartService.GetCartDtoAsync("u1");
 
             result.Count.Should().Be(2);
             result.Total.Should().Be(200);
@@ -290,7 +309,7 @@ namespace RetailSystem.Tests.Service
                 .Setup(x => x.GetFirstOrDefaultAsync(It.IsAny<Expression<Func<Cart, bool>>>(), It.IsAny<string>()))
                 .ReturnsAsync((Cart)null);
 
-            var result = await _service.GetCartDtoAsync("u1");
+            var result = await _cartService.GetCartDtoAsync("u1");
 
             result.Items.Should().BeEmpty();
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RetailSystem.Infrastructure.Services.Interfaces;
 
@@ -6,6 +7,7 @@ namespace RetailSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class CloudinaryController : ControllerBase
     {
         private readonly ICloudinaryService _cloudinaryService;
