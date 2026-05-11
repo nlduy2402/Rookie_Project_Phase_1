@@ -28,10 +28,6 @@ namespace RetailSystem.CustomerSite.Controllers
             return View(result.Data ?? Enumerable.Empty<ProductViewModel>());
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

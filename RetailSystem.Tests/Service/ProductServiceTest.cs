@@ -17,6 +17,7 @@ using RetailSystem.Shared.ResponseModels;
 using RetailSystem.Infrastructure.Services.Interfaces;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace RetailSystem.Tests.Service
 {
@@ -767,6 +768,661 @@ namespace RetailSystem.Tests.Service
             capturedProduct.Price.Should().Be(dto.Price);
             capturedProduct.RAM.Should().Be(dto.RAM);
             capturedProduct.SSD.Should().Be(dto.SSD);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_WhenProductNotFound_ShouldReturnFail()
+        {
+            // Arrange
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync((Product)null);
+
+            var dto = new UpdateProductDTO
+            {
+                Id = 1
+            };
+
+            // Act
+            var result = await _productService.UpdateAsync(dto);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Message.Should().Be("Not Exist");
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldRemoveDeletedImages()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = new List<ProductImage>
+        {
+            new ProductImage
+            {
+                Id = 1,
+                Name = "img1"
+            },
+            new ProductImage
+            {
+                Id = 2,
+                Name = "img2"
+            }
+        }
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            var dto = new UpdateProductDTO
+            {
+                Id = 1,
+                ExistImages = new List<int> { 1 }
+            };
+
+            // Act
+            var result = await _productService.UpdateAsync(dto);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            product.Images.Should().HaveCount(1);
+
+            product.Images.First().Id.Should().Be(1);
+
+            _cloudinaryServiceMock.Verify(
+                x => x.DeletePhotoAsync("img2"),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldNotDeleteCloudinary_WhenImageNameNull()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = new List<ProductImage>
+        {
+            new ProductImage
+            {
+                Id = 2,
+                Name = null
+            }
+        }
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            var dto = new UpdateProductDTO
+            {
+                Id = 1,
+                ExistImages = new List<int>()
+            };
+
+            // Act
+            await _productService.UpdateAsync(dto);
+
+            // Assert
+            _cloudinaryServiceMock.Verify(
+                x => x.DeletePhotoAsync(It.IsAny<string>()),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldUploadNewImages()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = new List<ProductImage>()
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            var fileMock = new Mock<IFormFile>();
+
+            var dto = new UpdateProductDTO
+            {
+                Id = 1,
+                ExistImages = new List<int>(),
+                Images = new List<IFormFile>
+                {
+                    fileMock.Object
+                }
+            };
+
+            _cloudinaryServiceMock
+                .Setup(x => x.AddPhotoAsync(
+                    It.IsAny<IFormFile>()))
+                .ReturnsAsync(new ImageUploadResult
+                {
+                    PublicId = "abc",
+                    SecureUrl = new Uri("https://img.com/a.jpg")
+                });
+
+            // Act
+            var result = await _productService.UpdateAsync(dto);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            product.Images.Should().HaveCount(1);
+
+            product.Images.First().Name.Should().Be("abc");
+
+            product.Images.First().Url
+                .Should().Be("https://img.com/a.jpg");
+
+            _cloudinaryServiceMock.Verify(
+                x => x.AddPhotoAsync(
+                    It.IsAny<IFormFile>()),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task UpdateAsync_WhenImagesNull_ShouldNotUpload()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = new List<ProductImage>()
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            var dto = new UpdateProductDTO
+            {
+                Id = 1,
+                ExistImages = new List<int>(),
+                Images = null
+            };
+
+            // Act
+            await _productService.UpdateAsync(dto);
+
+            // Assert
+            _cloudinaryServiceMock.Verify(
+                x => x.AddPhotoAsync(It.IsAny<IFormFile>()),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldCallUpdateAndSaveChanges()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = new List<ProductImage>()
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            _uowMock
+                .Setup(x => x.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            var dto = new UpdateProductDTO
+            {
+                Id = 1,
+                ExistImages = new List<int>()
+            };
+
+            // Act
+            var result = await _productService.UpdateAsync(dto);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            _productRepoMock.Verify(
+                x => x.Update(product),
+                Times.Once
+            );
+
+            _uowMock.Verify(
+                x => x.SaveChangesAsync(),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WhenProductNotFound_ShouldReturnFail()
+        {
+            // Arrange
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync((Product)null);
+
+            // Act
+            var result = await _productService.DeleteAsync(1);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+
+            result.Message.Should()
+                .Be("Product do not exist!");
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ShouldDeleteProductSuccessfully()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = new List<ProductImage>()
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            _uowMock
+                .Setup(x => x.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // Act
+            var result = await _productService.DeleteAsync(1);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            result.Message.Should()
+                .Be("Product Deleted !");
+
+            _productRepoMock.Verify(
+                x => x.Delete(product),
+                Times.Once
+            );
+
+            _uowMock.Verify(
+                x => x.SaveChangesAsync(),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ShouldDeleteCloudinaryImages()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = new List<ProductImage>
+        {
+            new ProductImage
+            {
+                Name = "img1"
+            },
+            new ProductImage
+            {
+                Name = "img2"
+            }
+        }
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            _uowMock
+                .Setup(x => x.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // Act
+            await _productService.DeleteAsync(1);
+
+            // Assert
+            _cloudinaryServiceMock.Verify(
+                x => x.DeletePhotoAsync("img1"),
+                Times.Once
+            );
+
+            _cloudinaryServiceMock.Verify(
+                x => x.DeletePhotoAsync("img2"),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WhenImageNameNull_ShouldNotCallCloudinary()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = new List<ProductImage>
+        {
+            new ProductImage
+            {
+                Name = null
+            }
+        }
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            _uowMock
+                .Setup(x => x.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // Act
+            await _productService.DeleteAsync(1);
+
+            // Assert
+            _cloudinaryServiceMock.Verify(
+                x => x.DeletePhotoAsync(
+                    It.IsAny<string>()),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WhenImagesNull_ShouldDeleteSuccessfully()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = null
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            _uowMock
+                .Setup(x => x.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // Act
+            var result = await _productService.DeleteAsync(1);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            _cloudinaryServiceMock.Verify(
+                x => x.DeletePhotoAsync(
+                    It.IsAny<string>()),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WhenSaveChangesThrowsException_ShouldThrow()
+        {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Images = new List<ProductImage>()
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images"))
+                .ReturnsAsync(product);
+
+            _uowMock
+                .Setup(x => x.SaveChangesAsync())
+                .ThrowsAsync(new DbUpdateException());
+
+            // Act
+            var result = await _productService.DeleteAsync(1);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+
+            result.Message.Should()
+                .Be("Error occured while update data");
+        }
+
+        [Fact]
+        public async Task GetPagedAsync_ShouldReturnPagedProducts()
+        {
+            // Arrange
+            var products = new List<Product>
+            {
+                new Product
+                {
+                    Id = 1,
+                    Name = "Laptop"
+                },
+                new Product
+                {
+                    Id = 2,
+                    Name = "Phone"
+                }
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetPagedAsync(1, 5))
+                .ReturnsAsync((products, 10));
+
+            // Act
+            var result = await _productService.GetPagedAsync(1, 5);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            result.Data.Should().NotBeNull();
+
+            result.Data.Items.Should().HaveCount(2);
+
+            result.Data.TotalCount.Should().Be(10);
+
+            result.Data.Page.Should().Be(1);
+
+            result.Data.PageSize.Should().Be(5);
+
+            result.Data.TotalPages.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task GetPagedAsync_WhenNoProducts_ShouldReturnEmptyList()
+        {
+            // Arrange
+            var products = new List<Product>();
+
+            _productRepoMock
+                .Setup(x => x.GetPagedAsync(1, 5))
+                .ReturnsAsync((products, 0));
+
+            // Act
+            var result = await _productService.GetPagedAsync(1, 5);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            result.Data.Should().NotBeNull();
+
+            result.Data.Items.Should().BeEmpty();
+
+            result.Data.TotalCount.Should().Be(0);
+
+            result.Data.TotalPages.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task GetPagedAsync_ShouldCallRepository()
+        {
+            // Arrange
+            _productRepoMock
+                .Setup(x => x.GetPagedAsync(1, 5))
+                .ReturnsAsync((new List<Product>(), 0));
+
+            // Act
+            await _productService.GetPagedAsync(1, 5);
+
+            // Assert
+            _productRepoMock.Verify(
+                x => x.GetPagedAsync(1, 5),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GetTopSellingProductCardsAsync_ShouldReturnData()
+        {
+            // Arrange
+            var topDtos = new List<TopProductDTO>
+            {
+                new TopProductDTO { ProductId = 1, TotalSold = 10 }
+            };
+
+                    var products = new List<Product>
+            {
+                new Product
+                {
+                    Id = 1,
+                    Name = "Laptop",
+                    Images = new List<ProductImage>(),
+                    Category = new Category()
+                }
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetTopSellingProductsAsync(2, 4))
+                .ReturnsAsync(topDtos);
+
+            _productRepoMock
+                .Setup(x => x.GetAllAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images,Category"))
+                .ReturnsAsync(products);
+
+            // Act
+            var result = await _productService.GetTopSellingProductCardsAsync(2);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            result.Data.Should().NotBeNull();
+
+            result.Data.First().TotalSold.Should().Be(10);
+        }
+
+        [Fact]
+        public async Task GetTopSellingProductCardsAsync_WhenProductNotFound_ShouldFilterOut()
+        {
+            // Arrange
+            var topDtos = new List<TopProductDTO>
+            {
+                new TopProductDTO { ProductId = 1, TotalSold = 5 }
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetTopSellingProductsAsync(1, 4))
+                .ReturnsAsync(topDtos);
+
+            _productRepoMock
+                .Setup(x => x.GetAllAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images,Category"))
+                .ReturnsAsync(new List<Product>());
+
+            // Act
+            var result = await _productService.GetTopSellingProductCardsAsync(1);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            result.Data.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetTopSellingProductCardsAsync_WhenException_ShouldReturnFail()
+        {
+            // Arrange
+            _productRepoMock
+                .Setup(x => x.GetTopSellingProductsAsync(It.IsAny<int>(), 4))
+                .ThrowsAsync(new Exception("DB error"));
+
+            // Act
+            var result = await _productService.GetTopSellingProductCardsAsync(5);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+
+            result.Message.Should()
+                .Be("An error occurred while fetching top selling products.");
+        }
+
+        [Fact]
+        public async Task GetTopSellingProductCardsAsync_ShouldMapTotalSold()
+        {
+            // Arrange
+            var dto = new List<TopProductDTO>
+            {
+                new TopProductDTO { ProductId = 1, TotalSold = 99 }
+            };
+
+            var product = new Product
+            {
+                Id = 1,
+                Name = "Test",
+                Images = new List<ProductImage>(),
+                Category = new Category()
+            };
+
+            _productRepoMock
+                .Setup(x => x.GetTopSellingProductsAsync(1, 4))
+                .ReturnsAsync(dto);
+
+            _productRepoMock
+                .Setup(x => x.GetAllAsync(
+                    It.IsAny<Expression<Func<Product, bool>>>(),
+                    "Images,Category"))
+                .ReturnsAsync(new List<Product> { product });
+
+            // Act
+            var result = await _productService.GetTopSellingProductCardsAsync(1);
+
+            // Assert
+            result.Data.First().TotalSold.Should().Be(99);
         }
     }
 }

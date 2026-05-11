@@ -43,7 +43,7 @@ namespace RetailSystem.Infrastructure.Services
                     return new ServiceResult<List<Category>>
                     {
                         IsSuccess = true,
-                        Data = result?.ToList()
+                        Data = null
                     };
                 }
                 categories = result.ToList();

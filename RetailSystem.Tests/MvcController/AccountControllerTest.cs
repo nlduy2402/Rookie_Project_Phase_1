@@ -197,5 +197,23 @@ namespace RetailSystem.Tests.MvcController
             Assert.Contains(errors, e => e.ErrorMessage.Contains("at least 6 characters"));
             Assert.Contains(errors, e => e.ErrorMessage.Contains("non alphanumeric character"));
         }
+
+        [Fact]
+        public async Task Logout_ShouldSignOutAndRedirectToLogin()
+        {
+            // Act
+            var result = await _controller.Logout();
+
+            // Assert
+             _mockSignInManager.Verify(
+                x => x.SignOutAsync(),
+                Times.Once
+            );
+
+            var redirectResult =
+                Assert.IsType<RedirectToActionResult>(result);
+
+            Assert.Equal("Login", redirectResult.ActionName);
+        }
     }
 }

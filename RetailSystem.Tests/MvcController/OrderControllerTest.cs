@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
 using RetailSystem.CustomerSite.Controllers;
 using RetailSystem.Domain.Entities;
+using RetailSystem.Domain.Models;
 using RetailSystem.Infrastructure.Services.Interfaces;
 using RetailSystem.Shared.DTOs;
 using RetailSystem.Shared.ResponseModels;
@@ -73,11 +74,21 @@ namespace RetailSystem.Tests.MvcController
                 _vnPayServiceMock.Object
             );
 
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "user-1")
+            }, "mock"));
+
             // Fake TempData
             _controller.TempData = new TempDataDictionary(
                 new DefaultHttpContext(),
                 Mock.Of<ITempDataProvider>()
             );
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
         }
 
         [Fact]
@@ -777,6 +788,44 @@ namespace RetailSystem.Tests.MvcController
         }
 
         [Fact]
+        public async Task Create_WhenModelInvalid_AndCartNull_ShouldSetEmptyCartItems()
+        {
+            // Arrange
+            _controller.ModelState.AddModelError(
+                "Name",
+                "Required"
+            );
+
+            _userManagerMock
+                .Setup(x => x.GetUserId(It.IsAny<ClaimsPrincipal>()))
+                .Returns("user-1");
+
+            _cartServiceMock
+                .Setup(x => x.GetCartAsync("user-1"))
+                .ReturnsAsync((Cart)null);
+
+            var model = new CheckoutViewModel
+            {
+                OrderData = new OrderDTO()
+            };
+
+            // Act
+            var result = await _controller.Create(model);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+
+            Assert.Equal("Index", viewResult.ViewName);
+
+            var vm =
+                Assert.IsType<CheckoutViewModel>(viewResult.Model);
+
+            Assert.NotNull(vm.CartItems);
+
+            Assert.Empty(vm.CartItems);
+        }
+
+        [Fact]
         public async Task History_WhenServiceFails_ShouldReturnBadRequest()
         {
             // Arrange
@@ -1120,6 +1169,261 @@ namespace RetailSystem.Tests.MvcController
             var model = viewResult.Model as OrderHistoryViewModel;
 
             model.Items.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task PaymentReturn_WhenResultIsNull_ShouldReturnFailView()
+        {
+            // Arrange
+            _vnPayServiceMock
+                .Setup(x => x.Execute(It.IsAny<IQueryCollection>()))
+                .Returns((PaymentResult)null);
+
+            // Act
+            var result = await _controller.PaymentReturn();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+
+            Assert.Equal("Fail", viewResult.ViewName);
+        }
+
+        [Fact]
+        public async Task PaymentReturn_WhenOrderNotFound_ShouldReturnFailView()
+        {
+            // Arrange
+            var paymentResult = new PaymentResult
+            {
+                Success = true,
+                TxnRef = "txn123"
+            };
+
+            _vnPayServiceMock
+                .Setup(x => x.Execute(It.IsAny<IQueryCollection>()))
+                .Returns(paymentResult);
+
+            _orderServiceMock
+                .Setup(x => x.GetByTxnRefAsync("txn123"))
+                .ReturnsAsync((Order)null);
+
+            // Act
+            var result = await _controller.PaymentReturn();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+
+            Assert.Equal("Fail", viewResult.ViewName);
+        }
+
+        [Fact]
+        public async Task PaymentReturn_WhenPaymentSuccess_ShouldUpdateStatusAndClearCart()
+        {
+            // Arrange
+            var paymentResult = new PaymentResult
+            {
+                Success = true,
+                TxnRef = "txn123"
+            };
+
+            var order = new Order
+            {
+                Id = 1,
+                UserId = "user-1"
+            };
+
+            _vnPayServiceMock
+                .Setup(x => x.Execute(It.IsAny<IQueryCollection>()))
+                .Returns(paymentResult);
+
+            _orderServiceMock
+                .Setup(x => x.GetByTxnRefAsync("txn123"))
+                .ReturnsAsync(order);
+
+            // Act
+            var result = await _controller.PaymentReturn();
+
+            // Assert
+            _orderServiceMock.Verify(
+                x => x.UpdatePaymentStatusAsync(
+                    order,
+                    PaymentStatus.Paid),
+                Times.Once
+            );
+
+            _cartServiceMock.Verify(
+                x => x.ClearCartAsync("user-1"),
+                Times.Once
+            );
+
+            var viewResult = Assert.IsType<ViewResult>(result);
+
+            Assert.Equal("Success", viewResult.ViewName);
+        }
+
+        [Fact]
+        public async Task PaymentReturn_WhenPaymentFailed_ShouldUpdateStatusFailed()
+        {
+            // Arrange
+            var paymentResult = new PaymentResult
+            {
+                Success = false,
+                TxnRef = "txn123"
+            };
+
+            var order = new Order
+            {
+                Id = 1,
+                UserId = "user-1"
+            };
+
+            _vnPayServiceMock
+                .Setup(x => x.Execute(It.IsAny<IQueryCollection>()))
+                .Returns(paymentResult);
+
+            _orderServiceMock
+                .Setup(x => x.GetByTxnRefAsync("txn123"))
+                .ReturnsAsync(order);
+
+            // Act
+            var result = await _controller.PaymentReturn();
+
+            // Assert
+            _orderServiceMock.Verify(
+                x => x.UpdatePaymentStatusAsync(
+                    order,
+                    PaymentStatus.Failed),
+                Times.Once
+            );
+
+            _cartServiceMock.Verify(
+                x => x.ClearCartAsync(It.IsAny<string>()),
+                Times.Never
+            );
+
+            var viewResult = Assert.IsType<ViewResult>(result);
+
+            Assert.Equal("Fail", viewResult.ViewName);
+        }
+
+        [Fact]
+        public async Task Cancel_WhenIdInvalid_ShouldReturnBadRequest()
+        {
+            // Act
+            var result = await _controller.Cancel(0);
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+
+            Assert.Equal("Invalid input !", badRequest.Value);
+        }
+
+        [Fact]
+        public async Task Cancel_WhenSuccess_ShouldRedirectHistory()
+        {
+            // Act
+            var result = await _controller.Cancel(1);
+
+            // Assert
+            _orderServiceMock.Verify(
+                x => x.CancelOrderAsync(1, It.IsAny<string>()),
+                Times.Once
+            );
+
+            Assert.Equal(
+                "Order cancelled successfully!",
+                _controller.TempData["SuccessMessage"]
+            );
+
+            var redirect =
+                Assert.IsType<RedirectToActionResult>(result);
+
+            Assert.Equal("History", redirect.ActionName);
+        }
+
+        [Fact]
+        public async Task Cancel_WhenExceptionOccurs_ShouldSetErrorMessage()
+        {
+            // Arrange
+            _orderServiceMock
+                .Setup(x => x.CancelOrderAsync(
+                    1,
+                    It.IsAny<string>()))
+                .ThrowsAsync(new Exception("Cancel failed"));
+
+            // Act
+            var result = await _controller.Cancel(1);
+
+            // Assert
+            Assert.Equal(
+                "Cancel failed",
+                _controller.TempData["ErrorMessage"]
+            );
+
+            var redirect =
+                Assert.IsType<RedirectToActionResult>(result);
+
+            Assert.Equal("History", redirect.ActionName);
+        }
+
+        [Fact]
+        public async Task Received_WhenIdInvalid_ShouldReturnBadRequest()
+        {
+            // Act
+            var result = await _controller.Received(0);
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+
+            Assert.Equal("Invalid input !", badRequest.Value);
+        }
+
+        [Fact]
+        public async Task Received_WhenSuccess_ShouldRedirectHistory()
+        {
+            // Act
+            var result = await _controller.Received(1);
+
+            // Assert
+            _orderServiceMock.Verify(
+                x => x.CompleteOrderAsync(1,
+                    It.IsAny<string>()),
+                Times.Once
+            );
+
+            Assert.Equal(
+                "Order completed!",
+                _controller.TempData["SuccessMessage"]
+            );
+
+            var redirect =
+                Assert.IsType<RedirectToActionResult>(result);
+
+            Assert.Equal("History", redirect.ActionName);
+        }
+
+        [Fact]
+        public async Task Received_WhenExceptionOccurs_ShouldSetErrorMessage()
+        {
+            // Arrange
+            _orderServiceMock
+                .Setup(x => x.CompleteOrderAsync(
+                    1,
+                    It.IsAny<string>()))
+                .ThrowsAsync(new Exception("Complete failed"));
+
+            // Act
+            var result = await _controller.Received(1);
+
+            // Assert
+            Assert.Equal(
+                "Complete failed",
+                _controller.TempData["ErrorMessage"]
+            );
+
+            var redirect =
+                Assert.IsType<RedirectToActionResult>(result);
+
+            Assert.Equal("History", redirect.ActionName);
         }
     }
 }

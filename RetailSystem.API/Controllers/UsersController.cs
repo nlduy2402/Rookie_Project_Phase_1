@@ -19,7 +19,7 @@ namespace RetailSystem.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = _userService.GetAllCustomerAccountsAsync().Result;
+            var result = await _userService.GetAllCustomerAccountsAsync();
             if (result.IsSuccess)
             {
                 return OkResponse(result.Data);

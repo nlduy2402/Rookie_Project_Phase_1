@@ -14,6 +14,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using RetailSystem.Shared.ResponseModels;
+using RetailSystem.Infrastructure.Services.Interfaces;
 
 namespace RetailSystem.Tests.Service
 {
@@ -78,6 +79,25 @@ namespace RetailSystem.Tests.Service
                     It.IsAny<Expression<Func<Category, bool>>>(),
                     It.IsAny<string>()
                 ), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetAllAsync_WhenRepositoryReturnsNull_ShouldReturnSuccessWithNullData()
+        {
+            // Arrange
+            _repoMock
+                .Setup(x => x.GetAllAsync(
+                    It.IsAny<Expression<Func<Category, bool>>>(),
+                    It.IsAny<string>()))
+                .ReturnsAsync((IEnumerable<Category>)null);
+
+            // Act
+            var result = await _service.GetAllAsync();
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            result.Data.Should().BeNull();
         }
 
         // Test CreateAsync when valid, it should create category and clear cache
@@ -218,6 +238,65 @@ namespace RetailSystem.Tests.Service
             _repoMock.Verify(x => x.Update(category), Times.Once);
         }
 
+        [Fact]
+        public async Task DeleteAsync_WhenCategoryNotFound_ShouldReturnError()
+        {
+            // Arrange
+            _repoMock
+                .Setup(x => x.GetByIdAsync(1))
+                .ReturnsAsync((Category)null);
 
+            // Act
+            var result = await _service.DeleteAsync(1);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+
+            result.Message.Should()
+                .Be("Error Occured While Deleting Category");
+
+            _repoMock.Verify(
+                x => x.Delete(It.IsAny<Category>()),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WhenSuccess_ShouldDeleteCategory()
+        {
+            // Arrange
+            var category = new Category
+            {
+                Id = 1,
+                Name = "Laptop"
+            };
+
+            _repoMock
+                .Setup(x => x.GetByIdAsync(1))
+                .ReturnsAsync(category);
+
+            _uowMock
+                .Setup(x => x.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // Act
+            var result = await _service.DeleteAsync(1);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            result.Data.Should()
+                .Be("Category Deleted !");
+
+            _repoMock.Verify(
+                x => x.Delete(category),
+                Times.Once
+            );
+
+            _uowMock.Verify(
+                x => x.SaveChangesAsync(),
+                Times.Once
+            );
+        }
     }
 }

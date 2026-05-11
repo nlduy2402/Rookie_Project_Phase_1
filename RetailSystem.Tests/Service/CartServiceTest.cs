@@ -313,5 +313,122 @@ namespace RetailSystem.Tests.Service
 
             result.Items.Should().BeEmpty();
         }
+
+        [Fact]
+        public async Task GetCartDtoAsync_WhenProductIsNull_ShouldUseDefaultValues()
+        {
+            // Arrange
+            var cart = new Cart
+            {
+                Items = new List<CartItem>
+        {
+            new CartItem
+            {
+                ProductId = 1,
+                Quantity = 2,
+                Product = null
+            }
+        }
+            };
+
+            _cartRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Cart, bool>>>(),
+                    "Items.Product.Images"))
+                .ReturnsAsync(cart);
+
+            // Act
+            var result = await _cartService.GetCartDtoAsync("u1");
+
+            // Assert
+            result.Count.Should().Be(2);
+
+            result.Total.Should().Be(0);
+
+            result.Items.First().Price.Should().Be(0);
+
+            result.Items.First().Image
+                .Should().Be("/images/no-image.png");
+        }
+
+        [Fact]
+        public async Task GetCartDtoAsync_WhenImagesEmpty_ShouldUseDefaultImage()
+        {
+            // Arrange
+            var cart = new Cart
+            {
+                Items = new List<CartItem>
+        {
+            new CartItem
+            {
+                ProductId = 1,
+                Quantity = 1,
+                Product = new Product
+                {
+                    Name = "Laptop",
+                    Price = 100,
+                    Images = new List<ProductImage>()
+                }
+            }
+        }
+            };
+
+            _cartRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Cart, bool>>>(),
+                    "Items.Product.Images"))
+                .ReturnsAsync(cart);
+
+            // Act
+            var result = await _cartService.GetCartDtoAsync("u1");
+
+            // Assert
+            result.Total.Should().Be(100);
+
+            result.Items.First().Image
+                .Should().Be("/images/no-image.png");
+        }
+
+        [Fact]
+        public async Task GetCartDtoAsync_WhenImageExists_ShouldReturnImageUrl()
+        {
+            // Arrange
+            var cart = new Cart
+            {
+                Items = new List<CartItem>
+        {
+            new CartItem
+            {
+                ProductId = 1,
+                Quantity = 1,
+                Product = new Product
+                {
+                    Name = "Laptop",
+                    Price = 100,
+                    Images = new List<ProductImage>
+                    {
+                        new ProductImage
+                        {
+                            Url = "img.jpg"
+                        }
+                    }
+                }
+            }
+        }
+            };
+
+            _cartRepoMock
+                .Setup(x => x.GetFirstOrDefaultAsync(
+                    It.IsAny<Expression<Func<Cart, bool>>>(),
+                    "Items.Product.Images"))
+                .ReturnsAsync(cart);
+
+            // Act
+            var result = await _cartService.GetCartDtoAsync("u1");
+
+            // Assert
+            result.Items.First().Image
+                .Should().Be("img.jpg");
+        }
     }
 }

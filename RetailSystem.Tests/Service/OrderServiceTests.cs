@@ -5,6 +5,7 @@ using RetailSystem.Domain.Entities;
 using RetailSystem.Infrastructure.Repository.Interface;
 using RetailSystem.Infrastructure.Services;
 using RetailSystem.Shared.DTOs;
+using RetailSystem.Shared.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1303,6 +1304,206 @@ namespace RetailSystem.Tests.Service
             // Assert
             _uowMock.Verify(
                 x => x.SaveChangesAsync(),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GetUserOrdersPagedAsync_ShouldThrow_WhenUserIdNull()
+        {
+            // Act
+            Func<Task> act = async () =>
+                await _orderService.GetUserOrdersPagedAsync(null, 1, 10);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<ArgumentNullException>()
+                .WithMessage("*userId*");
+        }
+
+        [Fact]
+        public async Task GetUserOrdersPagedAsync_ShouldThrow_WhenPageInvalid()
+        {
+            // Act
+            Func<Task> act = async () =>
+                await _orderService.GetUserOrdersPagedAsync("u1", 0, 10);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage("Page Value Is Invalid");
+        }
+
+        [Fact]
+        public async Task GetUserOrdersPagedAsync_ShouldReturnData()
+        {
+            // Arrange
+            var pageResult = new PageResult<Order>
+            {
+                Items = new List<Order>
+        {
+            new Order { Id = 1, UserId = "u1" }
+        },
+                TotalCount = 1,
+                Page = 1,
+                PageSize = 10
+            };
+
+            _orderRepoMock
+                .Setup(x => x.GetOrderHistoryByUserIdAsync("u1", 1, 10))
+                .ReturnsAsync(pageResult);
+
+            // Act
+            var result = await _orderService.GetUserOrdersPagedAsync("u1", 1, 10);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.Data.Items.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task GetOrderWithDetailsAsync_ShouldThrow_WhenOrderNotFound()
+        {
+            // Arrange
+            _orderRepoMock
+                .Setup(x => x.GetOrderWithDetailsAsync(1))
+                .ReturnsAsync((Order)null);
+
+            // Act
+            Func<Task> act = async () =>
+                await _orderService.GetOrderWithDetailsAsync(1, "u1");
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage("Order not found");
+        }
+
+        [Fact]
+        public async Task GetOrderWithDetailsAsync_ShouldThrow_WhenUnauthorized()
+        {
+            // Arrange
+            var order = new Order
+            {
+                Id = 1,
+                UserId = "u2"
+            };
+
+            _orderRepoMock
+                .Setup(x => x.GetOrderWithDetailsAsync(1))
+                .ReturnsAsync(order);
+
+            // Act
+            Func<Task> act = async () =>
+                await _orderService.GetOrderWithDetailsAsync(1, "u1");
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage("Unauthorized");
+        }
+
+        [Fact]
+        public async Task GetOrderWithDetailsAsync_ShouldReturnOrder_WhenValid()
+        {
+            // Arrange
+            var order = new Order
+            {
+                Id = 1,
+                UserId = "u1"
+            };
+
+            _orderRepoMock
+                .Setup(x => x.GetOrderWithDetailsAsync(1))
+                .ReturnsAsync(order);
+
+            // Act
+            var result = await _orderService.GetOrderWithDetailsAsync(1, "u1");
+
+            // Assert
+            result.Should().NotBeNull();
+            result.UserId.Should().Be("u1");
+        }
+
+        [Fact]
+        public async Task GetAllOrdersPagedAsync_ShouldThrow_WhenPageInvalid()
+        {
+            // Act
+            Func<Task> act = async () =>
+                await _orderService.GetAllOrdersPagedAsync(0, 10);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage("Invalid Pages Value");
+        }
+
+        [Fact]
+        public async Task GetAllOrdersPagedAsync_ShouldThrow_WhenPageSizeInvalid()
+        {
+            // Act
+            Func<Task> act = async () =>
+                await _orderService.GetAllOrdersPagedAsync(1, 0);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<Exception>()
+                .WithMessage("Invalid Pages Value");
+        }
+
+        [Fact]
+        public async Task GetAllOrdersPagedAsync_ShouldReturnData()
+        {
+            // Arrange
+            var pageResult = new PageResult<Order>
+            {
+                Items = new List<Order>
+                {
+                    new Order { Id = 1 },
+                    new Order { Id = 2 }
+                },
+                TotalCount = 2,
+                Page = 1,
+                PageSize = 10
+            };
+
+            _orderRepoMock
+                .Setup(x => x.GetAllOrdersPagedAsync(1, 10))
+                .ReturnsAsync(pageResult);
+
+            // Act
+            var result = await _orderService.GetAllOrdersPagedAsync(1, 10);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            result.Data.Items.Should().HaveCount(2);
+
+            result.Data.TotalCount.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task GetAllOrdersPagedAsync_ShouldCallRepository()
+        {
+            // Arrange
+            var pageResult = new PageResult<Order>
+            {
+                Items = new List<Order>(),
+                TotalCount = 0,
+                Page = 1,
+                PageSize = 10
+            };
+
+            _orderRepoMock
+                .Setup(x => x.GetAllOrdersPagedAsync(1, 10))
+                .ReturnsAsync(pageResult);
+
+            // Act
+            await _orderService.GetAllOrdersPagedAsync(1, 10);
+
+            // Assert
+            _orderRepoMock.Verify(
+                x => x.GetAllOrdersPagedAsync(1, 10),
                 Times.Once
             );
         }

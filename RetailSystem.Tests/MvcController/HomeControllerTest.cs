@@ -13,18 +13,34 @@ using System.Text;
 using System.Threading.Tasks;
 using RetailSystem.Shared.ResponseModels;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using RetailSystem.CustomerSite.Models;
+using Microsoft.Extensions.Logging;
 namespace RetailSystem.Tests.MvcController
 {
     public class HomeControllerTest
     {
         private readonly Mock<IProductService> _mockProductService;
         private readonly HomeController _controller;
-        
+        private readonly Mock<ILogger<HomeController>> _loggerMock;
+
         public HomeControllerTest()
         {
-            _mockProductService = new Mock<IProductService>();
-            var logger = new NullLogger<HomeController>();
-            _controller = new HomeController(logger, _mockProductService.Object);
+            _loggerMock =
+                new Mock<ILogger<HomeController>>();
+
+            _mockProductService =
+                new Mock<IProductService>();
+
+            _controller = new HomeController(
+                _loggerMock.Object,
+                _mockProductService.Object
+            );
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
         }
 
         [Fact]
@@ -96,6 +112,38 @@ namespace RetailSystem.Tests.MvcController
             );
 
             Assert.Empty(model);
+        }
+
+        [Fact]
+        public void Error_ShouldReturnViewWithErrorViewModel()
+        {
+            // Arrange
+            var loggerMock =
+                new Mock<ILogger<HomeController>>();
+
+            var productServiceMock =
+                new Mock<IProductService>();
+
+            var controller = new HomeController(
+                loggerMock.Object,
+                productServiceMock.Object
+            );
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+
+            // Act
+            var result = controller.Error();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+
+            var model =
+                Assert.IsType<ErrorViewModel>(viewResult.Model);
+
+            Assert.NotNull(model.RequestId);
         }
     }
 }

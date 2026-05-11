@@ -9,45 +9,37 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using RetailSystem.Shared.ResponseModels;
 using RetailSystem.Infrastructure.Services.Interfaces;
+using RetailSystem.Infrastructure.Repository.Interface;
 
 namespace RetailSystem.Infrastructure.Services
 {
     public class UserService : IUserService
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IUserRepository _userRepo;
 
-        public UserService(UserManager<User> userManager)
+        public UserService(IUserRepository userRepo)
         {
-            _userManager = userManager;
+            _userRepo = userRepo;
         }
 
         public async Task<ServiceResult<List<UserDTO>>> GetAllCustomerAccountsAsync()
         {
-            var result = await _userManager.Users
-              .Select(u => new UserDTO
-              {
-                  Id = u.Id,
-                  UserName = u.UserName,
-                  FullName = u.FullName,
-                  Email = u.Email
-              })
-              .ToListAsync();
-            if (result != null)
+            var users = await _userRepo.GetAllCustomersAsync();
+
+            var result = users.Select(u => new UserDTO
             {
-                return new ServiceResult<List<UserDTO>>
-                {
-                    IsSuccess = true,
-                    Data = result
-                };
-            }
-            else
+                Id = u.Id,
+                UserName = u.UserName,
+                FullName = u.FullName,
+                Email = u.Email
+            }).ToList();
+
+            return new ServiceResult<List<UserDTO>>
             {
-                return new ServiceResult<List<UserDTO>>
-                {
-                    IsSuccess = false,
-                    Message = "No customers found."
-                };
-            }
+                IsSuccess = result.Any(),
+                Data = result,
+                Message = result.Any() ? null : "No customers found."
+            };
         }
     }
 }

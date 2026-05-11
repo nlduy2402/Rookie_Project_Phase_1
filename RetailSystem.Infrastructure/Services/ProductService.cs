@@ -289,12 +289,9 @@ namespace RetailSystem.Infrastructure.Services
         {
             try
             {
-                // 1. Lấy danh sách TopProductDto từ Repository (chỉ gồm ID và TotalSold)
                 var topSellingDtos = await _uow.Products.GetTopSellingProductsAsync(top, 4);
                 var productIds = topSellingDtos.Select(d => d.ProductId).ToList();
 
-                // 2. Lấy thông tin chi tiết Product Entity từ Repo 
-                // Dùng Include để lấy đầy đủ Images và Category cho hàm ToCardVM
                 var products = await _uow.Products.GetAllAsync(
                     p => productIds.Contains(p.Id),
                     includeProperties: "Images,Category"
@@ -304,7 +301,7 @@ namespace RetailSystem.Infrastructure.Services
                 var viewModels = topSellingDtos.Select(dto =>
                 {
                     var p = products.FirstOrDefault(x => x.Id == dto.ProductId); 
-                    if (products == null) return null;
+                    if (p == null) return null;
 
                     var vm = p.ToCardVM();
 
