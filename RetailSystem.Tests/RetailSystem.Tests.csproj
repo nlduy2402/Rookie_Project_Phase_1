@@ -5,30 +5,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
-
-		<!-- Coverage -->
-		<CollectCoverage>true</CollectCoverage>
-		<CoverletOutput>./TestResults/coverage/</CoverletOutput>
-		<CoverletOutputFormat>cobertura</CoverletOutputFormat>
-
-		<!-- Chỉ coverage Controller + Service -->
-		<Include>
-			[RetailSystem.API]*Controller*,
-			[RetailSystem.API]*Service*
-		</Include>
-
-		<!-- Exclude -->
-		<Exclude>
-			[RetailSystem.API]*DTO*,
-			[RetailSystem.API]*Entity*,
-			[RetailSystem.API]*Repository*,
-			[RetailSystem.API]*Program*
-		</Exclude>
-
-	</PropertyGroup>
+</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="coverlet.msbuild" Version="6.0.2" />
+<PackageReference Include="coverlet.collector" Version="6.0.2" />
 		<PackageReference Include="FluentAssertions" Version="8.9.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 		<PackageReference Include="Moq" Version="4.20.72" />
@@ -49,3 +29,4 @@
 	</ItemGroup>
 
 </Project>
+

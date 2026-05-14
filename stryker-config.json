@@ -1,0 +1,25 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-net/master/src/Stryker.CLI/schema/stryker.schema.json",
+  "stryker-config": {
+    "test-projects": [
+      "RetailSystem.Tests/RetailSystem.Tests.csproj"
+    ],
+    "project-file": "RetailSystem.sln",
+    "reporters": ["html", "progress", "cleartext"],
+    "log-level": "info",
+    "mutate": [
+      "RetailSystem.API/**/*.cs",
+      "RetailSystem.CustomerSite/**/*.cs",
+      "RetailSystem.Domain/**/*.cs",
+      "RetailSystem.Infrastructure/**/*.cs",
+      "RetailSystem.Shared/**/*.cs",
+      "!RetailSystem.Infrastructure/**/Migrations/**/*.cs",
+      "!RetailSystem.CustomerSite/**/Views/**/*.cs",
+      "!RetailSystem.CustomerSite/**/Views/**/*.cshtml",
+      "!**/bin/**",
+      "!**/obj/**",
+      "!**/*.g.cs",
+      "!**/*.Designer.cs"
+    ]
+  }
+}

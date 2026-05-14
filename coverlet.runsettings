@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Include>[RetailSystem.*]*</Include>
+          <Exclude>[RetailSystem.CustomerSite]*AspNetCoreGeneratedDocument*,[RetailSystem.CustomerSite]*Program*,[RetailSystem.API]*Program*</Exclude>
+          <ExcludeByFile>**/Migrations/**/*.cs,**/Views/**/*.cs,**/Views/**/*.cshtml,**/bin/**/*.cs,**/obj/**/*.cs,**/*.g.cs,**/*.Designer.cs</ExcludeByFile>
+          <SkipAutoProps>true</SkipAutoProps>
+          <UseSourceLink>false</UseSourceLink>
+          <SingleHit>false</SingleHit>
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
+
